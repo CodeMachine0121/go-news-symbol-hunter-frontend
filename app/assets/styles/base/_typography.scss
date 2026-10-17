@@ -1,0 +1,10 @@
+@use '../abstracts' as *;
+
+body {
+  background: color('canvas');
+  color: color('text');
+  font-family: font-family('body');
+  font-size: font-size('md');
+  line-height: line-height('normal');
+  -webkit-font-smoothing: antialiased;
+}

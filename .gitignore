@@ -23,3 +23,7 @@ logs
 .idea
 .claude/settings.local.json
 coverage
+
+# Stryker
+.stryker-tmp
+reports/
