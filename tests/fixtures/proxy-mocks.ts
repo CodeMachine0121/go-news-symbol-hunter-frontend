@@ -4,6 +4,7 @@ import type { IApiKeyProxy } from '~/domain/interface/i-api-key-proxy'
 import type { IApiKeyStorageProxy } from '~/domain/interface/i-api-key-storage-proxy'
 import type { INewsProxy } from '~/domain/interface/i-news-proxy'
 import type { IRecentAnalysisStorageProxy } from '~/domain/interface/i-recent-analysis-storage-proxy'
+import type { ITrackedSymbolGradeProxy } from '~/domain/interface/i-tracked-symbol-grade-proxy'
 import type { RecentAnalysis } from '~/domain/models/entities/recent-analysis'
 
 export const mockApiKeyProxy = () => ({
@@ -43,3 +44,7 @@ export const mockAnalysisEventProxy = () => ({
   startSymbolAnalysis: vi.fn<IAnalysisEventProxy['startSymbolAnalysis']>(),
   getAnalysisEvent: vi.fn<IAnalysisEventProxy['getAnalysisEvent']>(),
 }) satisfies IAnalysisEventProxy
+
+export const mockTrackedSymbolGradeProxy = () => ({
+  getTrackedSymbolGrades: vi.fn<ITrackedSymbolGradeProxy['getTrackedSymbolGrades']>(),
+}) satisfies ITrackedSymbolGradeProxy

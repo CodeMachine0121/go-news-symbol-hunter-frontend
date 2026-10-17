@@ -4,6 +4,8 @@ import { AnalysisEvidence } from '~/domain/models/entities/analysis-evidence'
 import { AnalysisResult } from '~/domain/models/entities/analysis-result'
 import { KeyEvent } from '~/domain/models/entities/key-event'
 import { PriceAtAnalysis } from '~/domain/models/entities/price-at-analysis'
+import { SessionGrade } from '~/domain/models/entities/session-grade'
+import { TrackedSymbolGrade } from '~/domain/models/entities/tracked-symbol-grade'
 
 export const STARTED_AT = new Date('2026-10-16T02:00:00Z')
 
@@ -43,3 +45,8 @@ export const createAnalysisEvent = (overrides: {
     overrides.result,
   )
 
+export const createSessionGrade = (session: string): SessionGrade =>
+  new SessionGrade(session, 'bullish', 70, `${session} 理由`, [new KeyEvent(`${session} 事件`, `https://news.example/${session}`, new Date('2026-10-16T00:00:00Z'))], ['風險'], [], new Date('2026-10-16T01:00:00Z'))
+
+export const createTrackedSymbolGrade = (sessions: string[] = ['preMarket', 'intraday']): TrackedSymbolGrade =>
+  new TrackedSymbolGrade('2330', 'twStock', '2026-10-16', 'bullish', 0.85, 70, new Date('2026-10-16T05:00:00Z'), sessions.map(createSessionGrade))
