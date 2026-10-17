@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import AppPageHeader from '~/components/atoms/AppPageHeader.vue'
 import AppSpinner from '~/components/atoms/AppSpinner.vue'
 import IssuedApiKeyReveal from '~/components/molecules/IssuedApiKeyReveal.vue'
@@ -11,48 +11,45 @@ import ConsolePageLayout from '~/components/templates/ConsolePageLayout.vue'
 import { API_KEY_APPLICATION } from '~/composables/application-injection-keys'
 import { useApiKeyAccess } from '~/composables/use-api-key-access'
 import { useApplication } from '~/composables/use-application'
+import { useRequest } from '~/composables/use-request'
 import type { IssueApiKeyDto } from '~/domain/models/dto/issue-api-key-dto'
-import type { IssuedApiKeyDto } from '~/domain/models/dto/issued-api-key-dto'
 
 const apiKeyApplication = useApplication(API_KEY_APPLICATION)
 const { apiKeyAccess, isChecking, refresh, replace } = useApiKeyAccess()
 
-const issuedApiKey = ref<IssuedApiKeyDto>()
-const runningAction = ref<'issue' | 'use' | 'revoke'>()
-const actionError = ref<Error>()
+const apiKeyIssue = useRequest(async (issueApiKeyDto: IssueApiKeyDto) => {
+  const issuedApiKey = await apiKeyApplication.issueApiKey(issueApiKeyDto)
+  replace(issuedApiKey.access)
+  return issuedApiKey
+})
+const apiKeyUse = useRequest(async (apiKey: string) => replace(await apiKeyApplication.useApiKey(apiKey)))
+const apiKeyRevoke = useRequest(async () => replace(await apiKeyApplication.revokeApiKey()))
 
-const run = async (action: 'issue' | 'use' | 'revoke', operation: () => Promise<void>): Promise<void> => {
-  runningAction.value = action
-  actionError.value = undefined
-  try {
-    await operation()
-  }
-  catch (error: unknown) {
-    actionError.value = error instanceof Error ? error : new Error(String(error))
-  }
-  finally {
-    runningAction.value = undefined
+const actionError = computed(() => apiKeyIssue.error.value ?? apiKeyUse.error.value ?? apiKeyRevoke.error.value)
+
+const resetActions = (): void => {
+  for (const action of [apiKeyIssue, apiKeyUse, apiKeyRevoke]) {
+    action.reset()
   }
 }
 
-const issueApiKey = (issueApiKeyDto: IssueApiKeyDto) => run('issue', async () => {
-  issuedApiKey.value = await apiKeyApplication.issueApiKey(issueApiKeyDto)
-  replace(issuedApiKey.value.access)
-})
+const issueApiKey = (issueApiKeyDto: IssueApiKeyDto): Promise<void> => {
+  resetActions()
+  return apiKeyIssue.run(issueApiKeyDto)
+}
 
-const useApiKey = (apiKey: string) => run('use', async () => {
-  issuedApiKey.value = undefined
-  replace(await apiKeyApplication.useApiKey(apiKey))
-})
+const useApiKey = (apiKey: string): Promise<void> => {
+  resetActions()
+  return apiKeyUse.run(apiKey)
+}
 
-const revokeApiKey = () => run('revoke', async () => {
-  issuedApiKey.value = undefined
-  replace(await apiKeyApplication.revokeApiKey())
-})
+const revokeApiKey = (): Promise<void> => {
+  resetActions()
+  return apiKeyRevoke.run()
+}
 
 const forgetApiKey = (): void => {
-  issuedApiKey.value = undefined
-  actionError.value = undefined
+  resetActions()
   replace(apiKeyApplication.forgetApiKey())
 }
 
@@ -71,25 +68,25 @@ onMounted(() => refresh())
       @retry="refresh"
     />
     <IssuedApiKeyReveal
-      v-if="issuedApiKey"
-      :issued-api-key="issuedApiKey"
+      v-if="apiKeyIssue.data.value"
+      :issued-api-key="apiKeyIssue.data.value"
     />
     <AppSpinner v-if="apiKeyAccess === undefined" />
     <ApiKeyPanel
       v-else-if="apiKeyAccess.hasApiKey"
       :api-key-access="apiKeyAccess"
       :is-checking="isChecking"
-      :is-revoking="runningAction === 'revoke'"
+      :is-revoking="apiKeyRevoke.isRunning.value"
       @refresh="refresh"
       @forget="forgetApiKey"
       @revoke="revokeApiKey"
     />
     <ApiKeyIssueForm
-      :loading="runningAction === 'issue'"
+      :loading="apiKeyIssue.isRunning.value"
       @issue="issueApiKey"
     />
     <ApiKeyUseForm
-      :loading="runningAction === 'use'"
+      :loading="apiKeyUse.isRunning.value"
       @use="useApiKey"
     />
   </ConsolePageLayout>

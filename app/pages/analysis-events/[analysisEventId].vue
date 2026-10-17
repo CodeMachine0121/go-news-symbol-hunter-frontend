@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import AppPageHeader from '~/components/atoms/AppPageHeader.vue'
 import AppSpinner from '~/components/atoms/AppSpinner.vue'
 import RequestErrorAlert from '~/components/molecules/RequestErrorAlert.vue'
@@ -9,42 +9,21 @@ import ApiKeyGate from '~/components/organisms/ApiKeyGate.vue'
 import ConsolePageLayout from '~/components/templates/ConsolePageLayout.vue'
 import { SYMBOL_ANALYSIS_APPLICATION } from '~/composables/application-injection-keys'
 import { useAnalysisEventPolling } from '~/composables/use-analysis-event-polling'
-import { useApiKeyAccess } from '~/composables/use-api-key-access'
 import { useApplication } from '~/composables/use-application'
-import { BackendRejectionError } from '~/domain/errors/backend-rejection-error'
+import { useRequest } from '~/composables/use-request'
+import type { AnalysisEventDto } from '~/domain/models/dto/analysis-event-dto'
 import { SymbolQueryDto } from '~/domain/models/dto/symbol-query-dto'
 
 const route = useRoute()
 const analysisEventId = Number(route.params.analysisEventId)
 const symbolAnalysisApplication = useApplication(SYMBOL_ANALYSIS_APPLICATION)
-const { refresh } = useApiKeyAccess()
 const { analysisEvent, error, load } = useAnalysisEventPolling(analysisEventId)
-
-const isRestarting = ref(false)
-const restartError = ref<Error>()
-
-const restart = async (): Promise<void> => {
-  if (analysisEvent.value === undefined) {
-    return
-  }
-  isRestarting.value = true
-  restartError.value = undefined
-  try {
-    const startedSymbolAnalysis = await symbolAnalysisApplication.startSymbolAnalysis(
-      new SymbolQueryDto(analysisEvent.value.symbol, analysisEvent.value.category.value),
-    )
-    await navigateTo(`/analysis-events/${startedSymbolAnalysis.analysisEvent.analysisEventId}`)
-  }
-  catch (caught: unknown) {
-    restartError.value = caught instanceof Error ? caught : new Error(String(caught))
-    if (caught instanceof BackendRejectionError && caught.isApiKeyProblem) {
-      void refresh()
-    }
-  }
-  finally {
-    isRestarting.value = false
-  }
-}
+const symbolAnalysisRestart = useRequest(async (failedAnalysisEvent: AnalysisEventDto) => {
+  const startedSymbolAnalysis = await symbolAnalysisApplication.startSymbolAnalysis(
+    new SymbolQueryDto(failedAnalysisEvent.symbol, failedAnalysisEvent.category.value),
+  )
+  await navigateTo(`/analysis-events/${startedSymbolAnalysis.analysisEvent.analysisEventId}`)
+})
 
 onMounted(() => load())
 </script>
@@ -68,9 +47,9 @@ onMounted(() => load())
         @retry="load"
       />
       <RequestErrorAlert
-        v-if="restartError"
-        :error="restartError"
-        @retry="restart"
+        v-if="symbolAnalysisRestart.error.value"
+        :error="symbolAnalysisRestart.error.value"
+        @retry="symbolAnalysisRestart.retry"
       />
       <AppSpinner v-if="!analysisEvent && !error" />
       <div
@@ -87,7 +66,7 @@ onMounted(() => load())
           class="analysis-event-page__status"
           :analysis-event="analysisEvent"
           @refresh="load"
-          @restart="restart"
+          @restart="symbolAnalysisRestart.run(analysisEvent)"
         />
       </div>
     </ApiKeyGate>
