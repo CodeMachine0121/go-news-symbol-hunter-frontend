@@ -1,6 +1,7 @@
 import { vi } from 'vitest'
 import type { IApiKeyProxy } from '~/domain/interface/i-api-key-proxy'
 import type { IApiKeyStorageProxy } from '~/domain/interface/i-api-key-storage-proxy'
+import type { INewsProxy } from '~/domain/interface/i-news-proxy'
 
 export const mockApiKeyProxy = () => ({
   issueApiKey: vi.fn<IApiKeyProxy['issueApiKey']>(),
@@ -20,3 +21,7 @@ export const mockApiKeyStorageProxy = (initialApiKey?: string) => {
     }),
   } satisfies IApiKeyStorageProxy
 }
+
+export const mockNewsProxy = () => ({
+  searchSymbolNews: vi.fn<INewsProxy['searchSymbolNews']>(),
+}) satisfies INewsProxy
