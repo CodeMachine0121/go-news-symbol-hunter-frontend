@@ -238,6 +238,7 @@ flowchart TD
 - **`BackendHttpProxy`** 以 `ignoreResponseError` 讀取錯誤回覆，網路失敗統一轉成 `BackendUnavailableError`。
 - **`TrackedSymbolGradeCard`** 從 `TrackedSymbolGradeTable` 拆出，每張卡片自己管理展開狀態。
 - **`ConsolePageLayout`**（template）讓每個頁面只有單一根節點。
+- **`useRequest(operation)`**（composable）：頁面的請求生命週期（載入中、錯誤正規化、API key 問題時重新確認存取狀態、以最後一組參數重試、重設）收在一處；頁面只宣告「要呼叫哪個 Application method」，不再自己排序這些步驟。
 
 ---
 
