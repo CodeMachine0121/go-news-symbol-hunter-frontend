@@ -6,7 +6,7 @@
 
 > 純資訊 / 決策輔助：不代操、不下單。
 
-**狀態：尚未 scaffold。** 目前只有規範文件（`CLAUDE.md`、`.claude/rules/`），還沒有 `package.json`、`nuxt.config.ts` 與程式碼。
+**狀態：** 操作台已完成，涵蓋後端所有 API；需求、PRD、架構與驗收對照在 `.sdd/2026-10-17-web-console/`。
 
 ---
 
@@ -83,7 +83,7 @@ Clean / Onion Architecture，依賴一律指向 Domain：
 | 回測結果 | `outcome` | `hit` / `miss` / `neutral` / `pending` / `unevaluable` |
 | 命中率 | `hitRate` | 分母為 0 時是「沒有資料」，不是 0% |
 
-## 規劃中的畫面
+## 畫面
 
 | 畫面 | 對應端點 | 重點 |
 | :--- | :--- | :--- |
@@ -93,25 +93,38 @@ Clean / Onion Architecture，依賴一律指向 Domain：
 | 追蹤標的評等 | `/tracked-symbol-grades` | 綜合評等 + 盤前 / 盤中 / 盤後時段評等 |
 | 評等回測 | `/grade-backtest` | 命中率總表（並列隨機 50% 作比較）+ 逐筆明細 |
 
-前端的功能切片在本 repo 的 `.sdd/{YYYY-MM-DD}-{feature-slug}/` 規劃（尚未建立）。
+前端的功能切片在本 repo 的 `.sdd/{YYYY-MM-DD}-{feature-slug}/` 規劃。
 
 ## 開發
 
-> scaffold 後才能用。以下是預定的指令與設定。
-
 ```bash
+cp .env.example .env   # 第一次使用時建立；.env 不進版控
 bun install
-bun run dev        # 開發伺服器（http://localhost:3000）
-bun run test       # Vitest
-bun run lint       # ESLint
-bun run lint:style # stylelint
-bun run verify     # lint + lint:style
+bun run dev            # 開發伺服器（http://localhost:3000）
+bun run test           # Vitest
+bun run test:coverage  # Vitest + 覆蓋率
+bun run lint           # ESLint
+bun run lint:style     # stylelint
+bun run verify         # lint + lint:style
 bun run build
 ```
 
 先在 `../go-symbol-news-hunter` 啟動後端（`make start`，需要 PostgreSQL 與 `.env`）。
 
-**CORS**：後端目前沒有設定 CORS。開發時透過 Nuxt 的 server proxy（`nitro.devProxy` 或 `routeRules`）把 `/api/**` 轉到後端，避免瀏覽器跨來源請求。後端位址用環境變數設定（例如 `NUXT_PUBLIC_BACKEND_BASE_URL`，預設 `http://localhost:8081`），在組裝根 `app/plugins/dependencies.ts` 讀取後注入 Proxy。
+### 設定後端位址
+
+Nuxt 會自動讀取專案根目錄的 `.env`。`.env.example` 是範本並進版控；`.env` 只存在你的機器上（已在 `.gitignore` 排除）。
+
+| 變數 | 預設值 | 用途 |
+| :--- | :--- | :--- |
+| `NUXT_BACKEND_ORIGIN` | `http://localhost:8081` | 後端位址。Nuxt 把 `/api/**` 轉送到這裡 |
+| `NUXT_PUBLIC_BACKEND_BASE_URL` | `/api` | 瀏覽器呼叫 API 的前綴；通常不需要改 |
+
+接遠端後端時，只要改 `.env` 的 `NUXT_BACKEND_ORIGIN`，例如 `NUXT_BACKEND_ORIGIN=https://your-backend.example.com`，也可以直接帶在指令前：`NUXT_BACKEND_ORIGIN=https://your-backend.example.com bun run dev`。
+
+- **一律經由 `/api` 代理**：後端沒有設定 CORS，瀏覽器無法直接呼叫後端，所以不要把 `NUXT_PUBLIC_BACKEND_BASE_URL` 設成遠端網址。
+- **正式部署時後端位址在 build 時固定**：`NUXT_BACKEND_ORIGIN` 在 `bun run build` 時寫進產出，部署後改環境變數不會生效；換後端要重新 build。
+- **部署方式**：需要 Nuxt 的 node server（`node .output/server/index.mjs`）提供 `/api` 代理；只部署靜態檔案時沒有代理，操作台會顯示「服務暫時無法使用」。
 
 ## 開發規範
 
