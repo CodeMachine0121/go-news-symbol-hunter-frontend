@@ -27,6 +27,7 @@ export default defineConfig({
         'app/infrastructure/**',
         'app/composables/**',
         'app/components/**',
+        'app/pages/analysis-events/**',
       ],
       exclude: ['app/domain/interface/**'],
       reporter: ['text', 'json-summary'],

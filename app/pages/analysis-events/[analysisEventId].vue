@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import AppPageHeader from '~/components/atoms/AppPageHeader.vue'
 import AppSpinner from '~/components/atoms/AppSpinner.vue'
 import RequestErrorAlert from '~/components/molecules/RequestErrorAlert.vue'
@@ -15,6 +16,7 @@ import type { AnalysisEventDto } from '~/domain/models/dto/analysis-event-dto'
 import { SymbolQueryDto } from '~/domain/models/dto/symbol-query-dto'
 
 const route = useRoute()
+const router = useRouter()
 const analysisEventId = Number(route.params.analysisEventId)
 const symbolAnalysisApplication = useApplication(SYMBOL_ANALYSIS_APPLICATION)
 const { analysisEvent, error, load } = useAnalysisEventPolling(analysisEventId)
@@ -22,7 +24,7 @@ const symbolAnalysisRestart = useRequest(async (failedAnalysisEvent: AnalysisEve
   const startedSymbolAnalysis = await symbolAnalysisApplication.startSymbolAnalysis(
     new SymbolQueryDto(failedAnalysisEvent.symbol, failedAnalysisEvent.category.value),
   )
-  await navigateTo(`/analysis-events/${startedSymbolAnalysis.analysisEvent.analysisEventId}`)
+  await router.push(`/analysis-events/${startedSymbolAnalysis.analysisEvent.analysisEventId}`)
 })
 
 onMounted(() => load())

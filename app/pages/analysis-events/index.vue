@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import AppCard from '~/components/atoms/AppCard.vue'
 import AppPageHeader from '~/components/atoms/AppPageHeader.vue'
 import RequestErrorAlert from '~/components/molecules/RequestErrorAlert.vue'
@@ -11,12 +12,13 @@ import { useApplication } from '~/composables/use-application'
 import { useRequest } from '~/composables/use-request'
 import type { SymbolQueryDto } from '~/domain/models/dto/symbol-query-dto'
 
+const router = useRouter()
 const symbolAnalysisApplication = useApplication(SYMBOL_ANALYSIS_APPLICATION)
 const categories = symbolAnalysisApplication.listMarketCategories()
 const recentAnalyses = symbolAnalysisApplication.getRecentAnalyses()
 const symbolAnalysisStart = useRequest(async (symbolQueryDto: SymbolQueryDto) => {
   const startedSymbolAnalysis = await symbolAnalysisApplication.startSymbolAnalysis(symbolQueryDto)
-  await navigateTo(`/analysis-events/${startedSymbolAnalysis.analysisEvent.analysisEventId}`)
+  await router.push(`/analysis-events/${startedSymbolAnalysis.analysisEvent.analysisEventId}`)
 })
 </script>
 
