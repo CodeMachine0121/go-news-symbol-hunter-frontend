@@ -87,7 +87,7 @@ describe('analysis events page', () => {
     stack.analysisEventProxy.startSymbolAnalysis.mockReturnValue(new Promise(() => {}))
     await wrapper.find('select').setValue('crypto')
     await wrapper.find('input').setValue('BTC')
-    const submitButton = wrapper.find('button[type="submit"]')
+    const submitButton = wrapper.find<HTMLButtonElement>('button[type="submit"]')
 
     await wrapper.find('form').trigger('submit')
     await flushPromises()
