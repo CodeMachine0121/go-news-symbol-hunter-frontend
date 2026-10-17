@@ -82,6 +82,22 @@ describe('analysis events page', () => {
     expect(wrapper.find('form').exists()).toBe(true)
   })
 
+  it('sends a start only once while the first one is still in flight', async () => {
+    const { stack, wrapper } = await mountAnalysisRoutes('/analysis-events')
+    stack.analysisEventProxy.startSymbolAnalysis.mockReturnValue(new Promise(() => {}))
+    await wrapper.find('select').setValue('crypto')
+    await wrapper.find('input').setValue('BTC')
+    const submitButton = wrapper.find('button[type="submit"]')
+
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+    expect(submitButton.element.disabled).toBe(true)
+    await submitButton.trigger('click')
+    await flushPromises()
+
+    expect(stack.analysisEventProxy.startSymbolAnalysis).toHaveBeenCalledTimes(1)
+  })
+
   it('lists the analyses started in this browser', async () => {
     const { stack, router, wrapper } = await mountAnalysisRoutes('/analysis-events')
     stack.analysisEventProxy.startSymbolAnalysis.mockResolvedValue(new StartedSymbolAnalysis(true, createAnalysisEvent({ analysisEventId: 9, status: 'running' })))
