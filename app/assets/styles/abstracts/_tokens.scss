@@ -1,0 +1,91 @@
+$colors: (
+  'canvas': #f7f7f8,
+  'surface': #fff,
+  'surface-muted': #f2f2f4,
+  'surface-inverse': #18181b,
+  'border': #e4e4e7,
+  'border-strong': #d4d4d8,
+  'text': #18181b,
+  'text-muted': #71717a,
+  'text-subtle': #a1a1aa,
+  'text-inverse': #fff,
+  'primary': #18181b,
+  'primary-hover': #3f3f46,
+  'focus': #2563eb,
+  'positive': #15803d,
+  'positive-soft': #dcfce7,
+  'negative': #b91c1c,
+  'negative-soft': #fee2e2,
+  'neutral': #52525b,
+  'neutral-soft': #f4f4f5,
+  'info': #1d4ed8,
+  'info-soft': #dbeafe,
+  'warning': #a16207,
+  'warning-soft': #fef9c3,
+  'overlay': #18181b66,
+);
+
+$spacings: (
+  'none': 0,
+  '3xs': 2px,
+  '2xs': 4px,
+  'xs': 8px,
+  'sm': 12px,
+  'md': 16px,
+  'lg': 24px,
+  'xl': 32px,
+  '2xl': 48px,
+);
+
+$font-sizes: (
+  'xs': 12px,
+  'sm': 13px,
+  'md': 14px,
+  'lg': 16px,
+  'xl': 20px,
+  '2xl': 24px,
+  '3xl': 32px,
+);
+
+$font-weights: (
+  'regular': 400,
+  'medium': 500,
+  'semibold': 600,
+);
+
+$line-heights: (
+  'tight': 1.25,
+  'normal': 1.5,
+);
+
+$radii: (
+  'sm': 6px,
+  'md': 8px,
+  'lg': 12px,
+  'pill': 999px,
+);
+
+$shadows: (
+  'card': 0 1px 2px #18181b0d,
+  'dialog': 0 12px 32px #18181b33,
+);
+
+$sizes: (
+  'sidebar': 232px,
+  'category-field': 160px,
+  'content': 1120px,
+  'dialog': 440px,
+  'control': 36px,
+  'control-small': 28px,
+  'spinner': 16px,
+);
+
+$font-families: (
+  'body': (-apple-system, 'BlinkMacSystemFont', 'Segoe UI', 'Noto Sans TC', 'PingFang TC', sans-serif),
+  'mono': ('SFMono-Regular', 'Menlo', 'Consolas', monospace),
+);
+
+$durations: (
+  'fast': 120ms,
+  'spin': 800ms,
+);

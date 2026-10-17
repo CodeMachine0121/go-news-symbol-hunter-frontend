@@ -1,0 +1,19 @@
+@use 'functions' as *;
+
+@mixin focus-ring {
+  outline: 2px solid color('focus');
+  outline-offset: 2px;
+}
+
+@mixin surface {
+  background: color('surface');
+  border: 1px solid color('border');
+  border-radius: radius('lg');
+  box-shadow: shadow('card');
+}
+
+@mixin caption {
+  color: color('text-muted');
+  font-size: font-size('xs');
+  font-weight: font-weight('medium');
+}

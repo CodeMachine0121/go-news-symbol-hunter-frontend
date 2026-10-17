@@ -1,0 +1,39 @@
+{
+  "extends": [
+    "stylelint-config-standard-scss",
+    "stylelint-config-recommended-vue/scss"
+  ],
+  "rules": {
+    "color-no-hex": true,
+    "color-named": "never",
+    "function-disallowed-list": [
+      "rgb",
+      "rgba",
+      "hsl",
+      "hsla"
+    ],
+    "declaration-no-important": true,
+    "selector-class-pattern": [
+      "^[a-z][a-z0-9]*(-[a-z0-9]+)*(__[a-z0-9]+(-[a-z0-9]+)*)?(--[a-z0-9]+(-[a-z0-9]+)*)?$",
+      {
+        "message": "class 一律 BEM（block__element--modifier，kebab-case）"
+      }
+    ],
+    "scss/at-use-no-unnamespaced": null,
+    "scss/dollar-variable-pattern": null,
+    "scss/function-no-unknown": null,
+    "scss/dollar-variable-empty-line-before": null
+  },
+  "overrides": [
+    {
+      "files": [
+        "app/assets/styles/**/*.scss"
+      ],
+      "rules": {
+        "color-no-hex": null,
+        "color-named": null,
+        "function-disallowed-list": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+@use 'sass:map';
+@use '../abstracts/tokens';
+
+$groups: (
+  'color': tokens.$colors,
+  'spacing': tokens.$spacings,
+  'font-size': tokens.$font-sizes,
+  'font-weight': tokens.$font-weights,
+  'line-height': tokens.$line-heights,
+  'radius': tokens.$radii,
+  'shadow': tokens.$shadows,
+  'size': tokens.$sizes,
+  'font-family': tokens.$font-families,
+  'duration': tokens.$durations,
+);
+
+:root {
+  @each $group-name, $group in $groups {
+    @each $name, $value in $group {
+      --#{$group-name}-#{$name}: #{$value};
+    }
+  }
+}
