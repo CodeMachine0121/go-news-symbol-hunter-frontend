@@ -2,6 +2,7 @@ import { vi } from 'vitest'
 import type { IAnalysisEventProxy } from '~/domain/interface/i-analysis-event-proxy'
 import type { IApiKeyProxy } from '~/domain/interface/i-api-key-proxy'
 import type { IApiKeyStorageProxy } from '~/domain/interface/i-api-key-storage-proxy'
+import type { IBackendHealthProxy } from '~/domain/interface/i-backend-health-proxy'
 import type { IGradeBacktestProxy } from '~/domain/interface/i-grade-backtest-proxy'
 import type { INewsProxy } from '~/domain/interface/i-news-proxy'
 import type { IRecentAnalysisStorageProxy } from '~/domain/interface/i-recent-analysis-storage-proxy'
@@ -53,3 +54,7 @@ export const mockTrackedSymbolGradeProxy = () => ({
 export const mockGradeBacktestProxy = () => ({
   getGradeBacktest: vi.fn<IGradeBacktestProxy['getGradeBacktest']>(),
 }) satisfies IGradeBacktestProxy
+
+export const mockBackendHealthProxy = () => ({
+  checkHealth: vi.fn<IBackendHealthProxy['checkHealth']>(),
+}) satisfies IBackendHealthProxy
