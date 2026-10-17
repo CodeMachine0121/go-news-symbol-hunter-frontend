@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js'
 
-const PERCENT_DECIMAL_PLACES = 2
+const ROUNDED_PERCENT_DECIMAL_PLACES = 2
 
 export class RatioDomain {
   private readonly ratio: Decimal
@@ -9,12 +9,12 @@ export class RatioDomain {
     this.ratio = new Decimal(ratio)
   }
 
-  toPercentText(): string {
-    return `${this.ratio.times(100).toDecimalPlaces(PERCENT_DECIMAL_PLACES).toFixed()}%`
+  toRoundedPercentText(): string {
+    return `${this.ratio.times(100).toDecimalPlaces(ROUNDED_PERCENT_DECIMAL_PLACES).toFixed()}%`
   }
 
-  toSignedPercentText(): string {
+  toExactSignedPercentText(): string {
     const sign = this.ratio.greaterThan(0) ? '+' : ''
-    return `${sign}${this.toPercentText()}`
+    return `${sign}${this.ratio.times(100).toFixed()}%`
   }
 }

@@ -51,6 +51,8 @@ describe('GradeBacktestDomain', () => {
   it.each([
     { neutralAverageChangeRate: new Decimal('0.03'), text: '+3%' },
     { neutralAverageChangeRate: new Decimal('-0.0125'), text: '-1.25%' },
+    { neutralAverageChangeRate: new Decimal('0.012345'), text: '+1.2345%' },
+    { neutralAverageChangeRate: new Decimal('-0.000012345678'), text: '-0.0012345678%' },
     { neutralAverageChangeRate: new Decimal('0'), text: '0%' },
     { neutralAverageChangeRate: undefined, text: '—' },
   ])('shows the neutral average change rate $text', ({ neutralAverageChangeRate, text }) => {
@@ -69,6 +71,14 @@ describe('GradeBacktestDomain', () => {
 
     expect(analysis?.entryPriceText).toBe('—')
     expect(analysis?.outcome.label).toBe('無法評估')
+  })
+
+  it('shows the price change rate of an analysis exactly as the service gives it', () => {
+    const analysis = createGradeBacktest({
+      analyses: [createAnalysisBacktest({ outcome: 'hit', checkpointPrice: new Decimal('1012.345'), priceChangeRate: new Decimal('0.012345') })],
+    }).toDomain().toDto().analyses[0]
+
+    expect(analysis?.priceChangeRateText).toBe('+1.2345%')
   })
 
   it('shows the checkpoint figures of an evaluated analysis', () => {

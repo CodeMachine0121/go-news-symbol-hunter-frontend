@@ -26,19 +26,19 @@ export class GradeBacktestDomain {
       group,
       hitRate.hitCount,
       hitRate.missCount,
-      hitRate.hitRate === undefined ? NO_DATA : new RatioDomain(hitRate.hitRate).toPercentText(),
+      hitRate.hitRate === undefined ? NO_DATA : new RatioDomain(hitRate.hitRate).toRoundedPercentText(),
     )
     const toGroupDtos = (groups: Map<string, HitRate>, order: string[], toLabel: (key: string) => LabelledValueDto) =>
       order.map(key => toHitRateDto(toLabel(key), groups.get(key) ?? EMPTY_HIT_RATE))
     const neutralAverageChangeRate = this.gradeBacktest.neutralAverageChangeRate
     return new GradeBacktestDto(
       toHitRateDto(OVERALL, this.gradeBacktest.overall),
-      `隨機 ${new RatioDomain(this.gradeBacktest.randomBaseline).toPercentText()}`,
+      `隨機 ${new RatioDomain(this.gradeBacktest.randomBaseline).toRoundedPercentText()}`,
       toGroupDtos(this.gradeBacktest.byCategory, MARKET_CATEGORIES, category => new MarketCategoryDomain(category).toDto()),
       toGroupDtos(this.gradeBacktest.byGrade, GRADES, grade => new GradeDomain(grade).toDto()),
       toGroupDtos(this.gradeBacktest.byConfidenceBand, CONFIDENCE_BANDS, band => new ConfidenceBandDomain(band).toDto()),
       BACKTEST_OUTCOMES.map(outcome => new OutcomeCountDto(new BacktestOutcomeDomain(outcome).toDto(), this.gradeBacktest.outcomeCounts.get(outcome) ?? 0)),
-      neutralAverageChangeRate === undefined ? NOT_AVAILABLE : new RatioDomain(neutralAverageChangeRate).toSignedPercentText(),
+      neutralAverageChangeRate === undefined ? NOT_AVAILABLE : new RatioDomain(neutralAverageChangeRate).toExactSignedPercentText(),
       this.gradeBacktest.analyses.map(analysis => new AnalysisBacktestDto(
         analysis.analysisEventId,
         analysis.symbol,
@@ -50,7 +50,7 @@ export class GradeBacktestDomain {
         analysis.entryPrice?.toFixed() ?? NOT_AVAILABLE,
         analysis.checkpointDate ?? NOT_AVAILABLE,
         analysis.checkpointPrice?.toFixed() ?? NOT_AVAILABLE,
-        analysis.priceChangeRate === undefined ? NOT_AVAILABLE : new RatioDomain(analysis.priceChangeRate).toSignedPercentText(),
+        analysis.priceChangeRate === undefined ? NOT_AVAILABLE : new RatioDomain(analysis.priceChangeRate).toExactSignedPercentText(),
         new BacktestOutcomeDomain(analysis.outcome).toDto(),
       )),
     )
