@@ -29,18 +29,19 @@
 | 我想知道 | 去讀 |
 | :--- | :--- |
 | 前端要做什麼、對接哪些後端 API、怎麼啟動 | [README.md](README.md) |
-| 某個實體 / 動作 / enum 該叫什麼 | `../go-symbol-news-hunter/.sdd/UL-MAP.md`（**命名以此為準，不得自創同義詞**） |
+| 某個實體 / 動作 / enum 該叫什麼 | `../go-symbol-news-hunter/.sdd/UL-MAP.md`（**命名以此為準，不得自創同義詞**）；操作台自己新增的詞彙在本 repo `.sdd/UL-MAP.md` |
 | 後端某個功能的業務規則與驗收條件 | `../go-symbol-news-hunter/.sdd/{YYYY-MM-DD}-{feature-slug}/PRD.md` |
 | 後端端點的實際 request / response | `../go-symbol-news-hunter/postman/`、`internal/controller/`、`internal/domain/models/dto/` |
-| 前端功能切片的需求與設計 | 本 repo `.sdd/{YYYY-MM-DD}-{feature-slug}/`（尚未建立；新功能開新資料夾） |
+| 前端功能切片的需求與設計 | 本 repo `.sdd/{YYYY-MM-DD}-{feature-slug}/`（目前有 `2026-10-17-web-console`；新功能開新資料夾） |
+| 後端位址、環境變數 | [README.md](README.md) 的「設定後端位址」；範本是 `.env.example`，`.env` 不進版控 |
 
-- 文件或設定尚未建立時，**不要假設它們存在**（目前尚未 scaffold：沒有 `package.json`、`nuxt.config.ts`、ESLint / stylelint 設定）。
+- 文件或設定尚未建立時，**不要假設它們存在**；動工前先看實際的 `package.json`、`nuxt.config.ts`、`eslint.config.mjs`、`.stylelintrc.json`、`vitest.config.ts`。
 - 後端欄位或 enum 有疑問時，以後端程式碼與 UL-MAP 為準，不要在前端自行推測。
 
 ## 開發流程
 
 - 節奏是 **SDD + TDD**：BRIEF → PRD / UI-SPEC → ARCH → 依驗收條件逐案 red-green-refactor，一個 commit 對應一個小步驟。
-- commit 前自行執行並確認全過（scaffold 後才有）：`bun run verify`（lint + stylelint）、`bun run test`、`bun run build`。
+- commit 前自行執行並確認全過（目前沒有 pre-commit hook 擋）：`bun run verify`（lint + stylelint）、`bun run test`、`bun run typecheck`、`bun run build`。
 
 ## 情境對照表
 
