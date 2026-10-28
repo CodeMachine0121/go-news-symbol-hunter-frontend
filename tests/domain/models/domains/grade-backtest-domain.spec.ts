@@ -4,10 +4,10 @@ import { AnalysisBacktest } from '~/domain/models/entities/analysis-backtest'
 import { GradeBacktest } from '~/domain/models/entities/grade-backtest'
 import { HitRate } from '~/domain/models/entities/hit-rate'
 
-const createAnalysisBacktest = (overrides: { outcome?: string, entryPrice?: Decimal | null, checkpointPrice?: Decimal, priceChangeRate?: Decimal, checkpointDate?: string } = {}): AnalysisBacktest =>
-  new AnalysisBacktest(42, '2330', 'twStock', 'bullish', 80, 'short', new Date('2026-10-01T02:00:00Z'), overrides.entryPrice === null ? undefined : overrides.entryPrice ?? new Decimal('1000'), overrides.checkpointDate, overrides.checkpointPrice, overrides.priceChangeRate, overrides.outcome ?? 'pending')
+const createAnalysisBacktest = (overrides: { outcome?: string, entryPrice?: Decimal | null, checkpointPrice?: Decimal, priceChangeRate?: Decimal, checkpointDate?: string, source?: string, analysisEventId?: number | null, tradingDay?: string } = {}): AnalysisBacktest =>
+  new AnalysisBacktest(overrides.analysisEventId === null ? undefined : overrides.analysisEventId ?? 42, '2330', 'twStock', 'bullish', 80, 'short', new Date('2026-10-01T02:00:00Z'), overrides.entryPrice === null ? undefined : overrides.entryPrice ?? new Decimal('1000'), overrides.checkpointDate, overrides.checkpointPrice, overrides.priceChangeRate, overrides.outcome ?? 'pending', 7, overrides.source ?? 'manual', overrides.tradingDay)
 
-const createGradeBacktest = (overrides: { overall?: HitRate, byConfidenceBand?: Map<string, HitRate>, neutralAverageChangeRate?: Decimal, analyses?: AnalysisBacktest[] } = {}): GradeBacktest =>
+const createGradeBacktest = (overrides: { overall?: HitRate, byConfidenceBand?: Map<string, HitRate>, neutralAverageChangeRate?: Decimal, analyses?: AnalysisBacktest[], bySource?: Map<string, HitRate> } = {}): GradeBacktest =>
   new GradeBacktest(
     0.5,
     overrides.overall ?? new HitRate(26, 14, 0.65),
@@ -17,6 +17,7 @@ const createGradeBacktest = (overrides: { overall?: HitRate, byConfidenceBand?: 
     overrides.neutralAverageChangeRate,
     new Map([['hit', 26], ['pending', 3]]),
     overrides.analyses ?? [],
+    overrides.bySource ?? new Map(),
   )
 
 describe('GradeBacktestDomain', () => {
@@ -90,5 +91,38 @@ describe('GradeBacktestDomain', () => {
     expect(analysis?.outcome).toMatchObject({ label: '命中', tone: 'positive' })
     expect(analysis?.grade.label).toBe('看多')
     expect(analysis?.timeHorizon.label).toBe('短期（兩週內）')
+  })
+
+  it('compares manual and background hit rates, manual first', () => {
+    const bySource = createGradeBacktest({ bySource: new Map([['background', new HitRate(9, 11, 0.45)], ['manual', new HitRate(6, 4, 0.6)]]) }).toDomain().toDto().bySource
+
+    expect(bySource.map(hitRate => [hitRate.group.label, hitRate.hitRateText])).toEqual([['手動', '60%'], ['背景', '45%']])
+  })
+
+  it.each([
+    { name: 'a source with nothing to judge', bySource: new Map([['manual', new HitRate(6, 4, 0.6)], ['background', new HitRate(0, 0, undefined)]]), expected: [['手動', '60%'], ['背景', '沒有資料']] },
+    { name: 'a service that gives no source grouping', bySource: new Map<string, HitRate>(), expected: [['手動', '沒有資料'], ['背景', '沒有資料']] },
+  ])('shows 沒有資料 for $name', ({ bySource, expected }) => {
+    const hitRates = createGradeBacktest({ bySource }).toDomain().toDto().bySource
+
+    expect(hitRates.map(hitRate => [hitRate.group.label, hitRate.hitRateText])).toEqual(expected)
+  })
+
+  it('marks a manual record with its analysis event and no trading day', () => {
+    const analysis = createGradeBacktest({ analyses: [createAnalysisBacktest()] }).toDomain().toDto().analyses[0]
+
+    expect(analysis).toMatchObject({ gradeRecordId: 7, analysisEventId: 42, tradingDayText: '—', source: { value: 'manual', label: '手動' } })
+  })
+
+  it('marks a background record with its trading day and no analysis event', () => {
+    const analysis = createGradeBacktest({ analyses: [createAnalysisBacktest({ source: 'background', analysisEventId: null, tradingDay: '2026-10-28' })] }).toDomain().toDto().analyses[0]
+
+    expect(analysis).toMatchObject({ analysisEventId: undefined, tradingDayText: '2026-10-28', source: { value: 'background', label: '背景' } })
+  })
+
+  it('shows a grade source it does not know as it is', () => {
+    const analysis = createGradeBacktest({ analyses: [createAnalysisBacktest({ source: 'other' })] }).toDomain().toDto().analyses[0]
+
+    expect(analysis?.source).toMatchObject({ value: 'other', label: 'other' })
   })
 })

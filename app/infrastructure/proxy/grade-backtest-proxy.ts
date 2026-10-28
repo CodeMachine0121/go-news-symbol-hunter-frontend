@@ -18,10 +18,14 @@ type GradeBacktestWire = {
   byCategory: Record<string, HitRateWire> | null
   byGrade: Record<string, HitRateWire> | null
   byConfidenceBand: Record<string, HitRateWire> | null
+  bySource: Record<string, HitRateWire> | null
   neutralAverageChangeRate: string | null
   outcomeCounts: Record<string, number> | null
   analyses: {
-    analysisEventId: number
+    gradeRecordId: number
+    source: string
+    analysisEventId: number | null
+    tradingDay: string | null
     symbol: string
     category: string
     grade: string
@@ -54,6 +58,7 @@ export class GradeBacktestProxy implements IGradeBacktestProxy {
         completedTo: gradeBacktestQuery.completedTo,
         symbol: gradeBacktestQuery.symbolQuery?.symbol,
         category: gradeBacktestQuery.symbolQuery?.category,
+        source: gradeBacktestQuery.source,
       },
     })
     const gradeBacktest = response.body
@@ -66,7 +71,7 @@ export class GradeBacktestProxy implements IGradeBacktestProxy {
       toDecimal(gradeBacktest.neutralAverageChangeRate),
       new Map(Object.entries(gradeBacktest.outcomeCounts ?? {})),
       (gradeBacktest.analyses ?? []).map(analysis => new AnalysisBacktest(
-        analysis.analysisEventId,
+        analysis.analysisEventId ?? undefined,
         analysis.symbol,
         analysis.category,
         analysis.grade,
@@ -78,7 +83,11 @@ export class GradeBacktestProxy implements IGradeBacktestProxy {
         toDecimal(analysis.checkpointPrice),
         toDecimal(analysis.priceChangeRate),
         analysis.outcome,
+        analysis.gradeRecordId,
+        analysis.source,
+        analysis.tradingDay ?? undefined,
       )),
+      toHitRates(gradeBacktest.bySource),
     )
   }
 }

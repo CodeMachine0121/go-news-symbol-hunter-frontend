@@ -14,6 +14,10 @@ export class GradeBacktestApplication {
     return this.marketCategoryService.listMarketCategories()
   }
 
+  listGradeSources(): LabelledValueDto[] {
+    return this.gradeBacktestService.listGradeSources()
+  }
+
   getGradeBacktest(gradeBacktestQueryDto: GradeBacktestQueryDto): Promise<GradeBacktestDto> {
     return this.gradeBacktestService.getGradeBacktest(gradeBacktestQueryDto)
   }

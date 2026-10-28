@@ -34,6 +34,7 @@ defineProps<{
           { title: '依市場類別', hitRates: gradeBacktest.byCategory },
           { title: '依評等', hitRates: gradeBacktest.byGrade },
           { title: '依信心分組', hitRates: gradeBacktest.byConfidenceBand },
+          { title: '依來源', hitRates: gradeBacktest.bySource },
         ]"
         :key="group.title"
         :title="group.title"

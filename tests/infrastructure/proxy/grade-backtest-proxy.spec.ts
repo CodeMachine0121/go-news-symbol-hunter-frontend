@@ -19,10 +19,14 @@ describe('GradeBacktestProxy', () => {
       byCategory: { twStock: { hitCount: 26, missCount: 14, hitRate: 0.65 } },
       byGrade: {},
       byConfidenceBand: { high: { hitCount: 0, missCount: 0, hitRate: null } },
+      bySource: { manual: { hitCount: 6, missCount: 4, hitRate: 0.6 }, background: { hitCount: 0, missCount: 0, hitRate: null } },
       neutralAverageChangeRate: '0.03',
       outcomeCounts: { hit: 26 },
       analyses: [{
+        gradeRecordId: 7,
+        source: 'manual',
         analysisEventId: 42,
+        tradingDay: null,
         symbol: '2330',
         category: 'twStock',
         grade: 'bullish',
@@ -34,18 +38,37 @@ describe('GradeBacktestProxy', () => {
         checkpointPrice: null,
         priceChangeRate: null,
         outcome: 'pending',
+      }, {
+        gradeRecordId: 8,
+        source: 'background',
+        analysisEventId: null,
+        tradingDay: '2026-10-28',
+        symbol: '4958',
+        category: 'twStock',
+        grade: 'neutral',
+        confidence: 50,
+        timeHorizon: 'short',
+        completedAt: '2026-10-28T04:31:10Z',
+        entryPrice: '548',
+        checkpointDate: null,
+        checkpointPrice: null,
+        priceChangeRate: null,
+        outcome: 'pending',
       }],
     }))
 
-    const gradeBacktest = await createProxy().getGradeBacktest(new GradeBacktestQueryVo('2026-10-01', '2026-10-31', new SymbolQueryVo('2330', 'twStock')), 'key')
+    const gradeBacktest = await createProxy().getGradeBacktest(new GradeBacktestQueryVo('2026-10-01', '2026-10-31', new SymbolQueryVo('2330', 'twStock'), 'manual'), 'key')
 
-    expect(requestOf(fetchStub)).toMatchObject({ url: 'http://backend.test/grade-backtest?completedFrom=2026-10-01&completedTo=2026-10-31&symbol=2330&category=twStock', method: 'GET', apiKey: 'key' })
+    expect(requestOf(fetchStub)).toMatchObject({ url: 'http://backend.test/grade-backtest?completedFrom=2026-10-01&completedTo=2026-10-31&symbol=2330&category=twStock&source=manual', method: 'GET', apiKey: 'key' })
     expect(gradeBacktest.overall).toMatchObject({ hitCount: 26, hitRate: 0.65 })
     expect(gradeBacktest.byCategory.get('twStock')).toMatchObject({ hitCount: 26, missCount: 14, hitRate: 0.65 })
     expect(gradeBacktest.byConfidenceBand.get('high')).toMatchObject({ hitCount: 0, hitRate: undefined })
     expect(gradeBacktest.neutralAverageChangeRate?.toFixed()).toBe('0.03')
     expect(gradeBacktest.outcomeCounts.get('hit')).toBe(26)
-    expect(gradeBacktest.analyses[0]).toMatchObject({ analysisEventId: 42, checkpointDate: undefined, checkpointPrice: undefined, priceChangeRate: undefined })
+    expect(gradeBacktest.bySource.get('manual')).toMatchObject({ hitCount: 6, missCount: 4, hitRate: 0.6 })
+    expect(gradeBacktest.bySource.get('background')).toMatchObject({ hitCount: 0, hitRate: undefined })
+    expect(gradeBacktest.analyses[0]).toMatchObject({ gradeRecordId: 7, source: 'manual', analysisEventId: 42, tradingDay: undefined, checkpointDate: undefined, checkpointPrice: undefined, priceChangeRate: undefined })
+    expect(gradeBacktest.analyses[1]).toMatchObject({ gradeRecordId: 8, source: 'background', analysisEventId: undefined, tradingDay: '2026-10-28' })
     expect(gradeBacktest.analyses[0]?.entryPrice?.toFixed()).toBe('1000.5')
   })
 
@@ -56,15 +79,17 @@ describe('GradeBacktestProxy', () => {
       byCategory: null,
       byGrade: null,
       byConfidenceBand: null,
+      bySource: null,
       neutralAverageChangeRate: null,
       outcomeCounts: null,
       analyses: null,
     }))
 
-    const gradeBacktest = await createProxy().getGradeBacktest(new GradeBacktestQueryVo(undefined, undefined, undefined), 'key')
+    const gradeBacktest = await createProxy().getGradeBacktest(new GradeBacktestQueryVo(undefined, undefined, undefined, undefined), 'key')
 
     expect(requestOf(fetchStub).url).toBe('http://backend.test/grade-backtest')
     expect(gradeBacktest.byCategory.size).toBe(0)
+    expect(gradeBacktest.bySource.size).toBe(0)
     expect(gradeBacktest.neutralAverageChangeRate).toBeUndefined()
     expect(gradeBacktest.outcomeCounts.size).toBe(0)
     expect(gradeBacktest.analyses).toEqual([])
