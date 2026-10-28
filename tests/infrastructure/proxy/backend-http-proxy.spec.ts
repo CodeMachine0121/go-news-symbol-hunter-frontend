@@ -41,10 +41,11 @@ describe('BackendHttpProxy', () => {
   it.each([
     {
       case: 'with candidates in the order the backend lists them',
-      candidates: [{ symbol: '2882', symbolName: '國泰金' }, { symbol: '00878', symbolName: ' 國泰永續高股息 ' }, { symbol: 'BTC', symbolName: '' }, { symbol: 'ETH' }],
-      expectedCandidates: [new SymbolCandidateDto('2882', '2882 國泰金'), new SymbolCandidateDto('00878', '00878 國泰永續高股息'), new SymbolCandidateDto('BTC', 'BTC'), new SymbolCandidateDto('ETH', 'ETH')],
+      candidates: [{ symbol: '2882', symbolName: '國泰金' }, { symbol: '00878', symbolName: ' 國泰永續高股息 ' }, { symbol: 'BTC', symbolName: '' }, { symbol: 'ETH' }, { symbolName: '沒有代號' }, { symbol: null, symbolName: null }, { symbol: '  ', symbolName: '空白代號' }, { symbol: 'SOL', symbolName: null }],
+      expectedCandidates: [new SymbolCandidateDto('2882', '2882 國泰金'), new SymbolCandidateDto('00878', '00878 國泰永續高股息'), new SymbolCandidateDto('BTC', 'BTC'), new SymbolCandidateDto('ETH', 'ETH'), new SymbolCandidateDto('SOL', 'SOL')],
     },
     { case: 'without candidates', candidates: undefined, expectedCandidates: [] },
+    { case: 'with null candidates', candidates: null, expectedCandidates: [] },
   ])('turns an ambiguous symbol name into a named error $case', async ({ candidates, expectedCandidates }) => {
     stubFetch(jsonResponse(422, { error: { code: 'symbol_ambiguous', message: '符合多個標的，請改填代號或更完整的名稱', candidates } }))
 
@@ -54,7 +55,7 @@ describe('BackendHttpProxy', () => {
     expect(error).toBeInstanceOf(SymbolAmbiguousError)
     expect(error).toBeInstanceOf(BackendRejectionError)
     expect(error).toMatchObject({ code: 'symbol_ambiguous', message: '符合多個標的，請改填代號或更完整的名稱', isApiKeyProblem: false })
-    expect(error instanceof SymbolAmbiguousError ? error.toCandidateDtos() : undefined).toEqual(expectedCandidates)
+    expect(error instanceof SymbolAmbiguousError ? error.candidates : undefined).toEqual(expectedCandidates)
   })
 
   it.each([

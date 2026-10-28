@@ -4,15 +4,10 @@ import { SymbolCandidateDto } from '~/domain/models/dto/symbol-candidate-dto'
 import type { SymbolCandidateVo } from '~/domain/models/vo/symbol-candidate-vo'
 
 export class SymbolAmbiguousError extends BackendRejectionError {
-  constructor(
-    code: string,
-    message: string,
-    private readonly candidates: SymbolCandidateVo[],
-  ) {
-    super(code, message)
-  }
+  readonly candidates: SymbolCandidateDto[]
 
-  toCandidateDtos(): SymbolCandidateDto[] {
-    return this.candidates.map(candidate => new SymbolCandidateDto(candidate.symbol, new SymbolLabelDomain(candidate.symbol, candidate.symbolName).toText()))
+  constructor(code: string, message: string, candidates: SymbolCandidateVo[]) {
+    super(code, message)
+    this.candidates = candidates.map(candidate => new SymbolCandidateDto(candidate.symbol, new SymbolLabelDomain(candidate.symbol, candidate.symbolName).toText()))
   }
 }

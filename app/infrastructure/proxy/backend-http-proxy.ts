@@ -5,7 +5,7 @@ import { SymbolAmbiguousError } from '~/domain/errors/symbol-ambiguous-error'
 import { SymbolCandidateVo } from '~/domain/models/vo/symbol-candidate-vo'
 
 type ErrorBodyWire = {
-  error?: { code?: string, message?: string, candidates?: { symbol: string, symbolName?: string }[] }
+  error?: { code?: string, message?: string, candidates?: { symbol?: string | null, symbolName?: string | null }[] | null }
 }
 
 const SYMBOL_AMBIGUOUS_CODE = 'symbol_ambiguous'
@@ -39,7 +39,9 @@ export class BackendHttpProxy {
     }
     const errorDetail = (response._data as ErrorBodyWire | undefined)?.error
     if (errorDetail?.code === SYMBOL_AMBIGUOUS_CODE && errorDetail.message !== undefined) {
-      const candidates = (errorDetail.candidates ?? []).map(candidate => new SymbolCandidateVo(candidate.symbol, candidate.symbolName ?? ''))
+      const candidates = (errorDetail.candidates ?? [])
+        .filter(candidate => typeof candidate.symbol === 'string' && candidate.symbol.trim() !== '')
+        .map(candidate => new SymbolCandidateVo((candidate.symbol ?? '').trim(), candidate.symbolName ?? ''))
       throw new SymbolAmbiguousError(errorDetail.code, errorDetail.message, candidates)
     }
     if (errorDetail?.code !== undefined && errorDetail.message !== undefined && errorDetail.code !== 'service_unavailable') {

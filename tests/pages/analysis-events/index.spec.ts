@@ -146,17 +146,41 @@ describe('analysis events page', () => {
     expect(router.currentRoute.value.fullPath).toBe('/analysis-events/12')
   })
 
-  it('keeps the candidates disabled while a chosen one is starting', async () => {
+  it('keeps the candidates disabled and marks the chosen one while it is starting', async () => {
+    const { stack, wrapper } = await mountAnalysisRoutes('/analysis-events')
+    stack.analysisEventProxy.startSymbolAnalysis
+      .mockRejectedValueOnce(new SymbolAmbiguousError('symbol_ambiguous', '符合多個標的，請改填代號或更完整的名稱', [new SymbolCandidateVo('2882', '國泰金'), new SymbolCandidateVo('00878', '國泰永續高股息')]))
+      .mockReturnValueOnce(new Promise(() => {}))
+    await startCathayAnalysis(wrapper)
+
+    await candidateButtons(wrapper)[1]!.trigger('click')
+    await flushPromises()
+
+    expect(candidateButtons(wrapper).map(button => (button.element as HTMLButtonElement).disabled)).toEqual([true, true])
+    expect(candidateButtons(wrapper).map(button => button.attributes('aria-busy'))).toEqual(['false', 'true'])
+  })
+
+  it('lists every candidate even when two share a symbol', async () => {
+    const { stack, wrapper } = await mountAnalysisRoutes('/analysis-events')
+    stack.analysisEventProxy.startSymbolAnalysis.mockRejectedValue(new SymbolAmbiguousError('symbol_ambiguous', '符合多個標的，請改填代號或更完整的名稱', [new SymbolCandidateVo('USDT', 'Tether'), new SymbolCandidateVo('USDT', 'Bridged USDT')]))
+
+    await startCathayAnalysis(wrapper)
+
+    expect(candidateButtons(wrapper).map(button => button.text())).toEqual(['USDT Tether', 'USDT Bridged USDT'])
+  })
+
+  it('drops the offered candidates as soon as a new search is sent from the form', async () => {
     const { stack, wrapper } = await mountAnalysisRoutes('/analysis-events')
     stack.analysisEventProxy.startSymbolAnalysis
       .mockRejectedValueOnce(new SymbolAmbiguousError('symbol_ambiguous', '符合多個標的，請改填代號或更完整的名稱', [new SymbolCandidateVo('2882', '國泰金')]))
       .mockReturnValueOnce(new Promise(() => {}))
     await startCathayAnalysis(wrapper)
 
-    await candidateButtons(wrapper)[0]!.trigger('click')
+    await wrapper.find('input').setValue('台積電')
+    await wrapper.find('form').trigger('submit')
     await flushPromises()
 
-    expect(candidateButtons(wrapper).map(button => (button.element as HTMLButtonElement).disabled)).toEqual([true])
+    expect(candidateButtons(wrapper)).toHaveLength(0)
   })
 
   it('shows a symbol that is not found without candidates', async () => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, watch } from 'vue'
+import { ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import AppCard from '~/components/atoms/AppCard.vue'
 import AppPageHeader from '~/components/atoms/AppPageHeader.vue'
@@ -20,21 +20,24 @@ const router = useRouter()
 const symbolAnalysisApplication = useApplication(SYMBOL_ANALYSIS_APPLICATION)
 const categories = symbolAnalysisApplication.listMarketCategories()
 const recentAnalyses = symbolAnalysisApplication.getRecentAnalyses()
-let startedCategory = ''
 const symbolAnalysisStart = useRequest(async (symbolQueryDto: SymbolQueryDto) => {
-  startedCategory = symbolQueryDto.category
   const startedSymbolAnalysis = await symbolAnalysisApplication.startSymbolAnalysis(symbolQueryDto)
   await router.push(`/analysis-events/${startedSymbolAnalysis.analysisEvent.analysisEventId}`)
 })
-// kept while a chosen candidate is being started, so the list stays in place with its buttons disabled
-const symbolCandidates = shallowRef<SymbolCandidateDto[]>([])
-watch(symbolAnalysisStart.isRunning, (isRunning) => {
-  if (!isRunning) {
-    const error = symbolAnalysisStart.error.value
-    symbolCandidates.value = error instanceof SymbolAmbiguousError ? error.toCandidateDtos() : []
-  }
-})
-const startCandidateAnalysis = (symbol: string): Promise<void> => symbolAnalysisStart.run(new SymbolQueryDto(symbol, startedCategory))
+const offeredCandidates = shallowRef<SymbolCandidateDto[]>([])
+// a candidate is started in the market category of the start that offered it
+const offeredCategory = ref('')
+const startAnalysis = async (symbolQueryDto: SymbolQueryDto): Promise<void> => {
+  await symbolAnalysisStart.run(symbolQueryDto)
+  const error = symbolAnalysisStart.error.value
+  offeredCandidates.value = error instanceof SymbolAmbiguousError ? error.candidates : []
+  offeredCategory.value = symbolQueryDto.category
+}
+const startFormAnalysis = (symbolQueryDto: SymbolQueryDto): Promise<void> => {
+  offeredCandidates.value = []
+  return startAnalysis(symbolQueryDto)
+}
+const startCandidateAnalysis = (symbol: string): Promise<void> => startAnalysis(new SymbolQueryDto(symbol, offeredCategory.value))
 </script>
 
 <template>
@@ -53,7 +56,7 @@ const startCandidateAnalysis = (symbol: string): Promise<void> => symbolAnalysis
           submit-label="發起分析"
           symbol-placeholder="例如 2330、台積電、AAPL、Bitcoin"
           :loading="symbolAnalysisStart.isRunning.value"
-          @submit="symbolAnalysisStart.run"
+          @submit="startFormAnalysis"
         />
       </AppCard>
       <RequestErrorAlert
@@ -62,8 +65,8 @@ const startCandidateAnalysis = (symbol: string): Promise<void> => symbolAnalysis
         @retry="symbolAnalysisStart.retry"
       />
       <SymbolCandidateList
-        v-if="symbolCandidates.length > 0"
-        :candidates="symbolCandidates"
+        v-if="offeredCandidates.length > 0"
+        :candidates="offeredCandidates"
         :loading="symbolAnalysisStart.isRunning.value"
         @choose="startCandidateAnalysis"
       />
