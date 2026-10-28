@@ -90,6 +90,7 @@ Clean / Onion Architecture，依賴一律指向 Domain：
 | API key 設定 | `/api-keys`、`/api-keys/me` | 建立、保存在瀏覽器、顯示狀態（停用中要提示等 administrator 啟用）、撤銷 |
 | 新聞搜尋 | `/news` | 標的 + 市場類別；顯示失敗的新聞來源 |
 | 標的分析 | `/analysis-events` | 發起後輪詢到 `succeeded` / `failed`；顯示評等、信心、理由、關鍵事件（附來源連結）、風險因子、分析時價格 |
+| 分析報告（匯出 PDF） | `/analysis-events/:analysisEventId` | 只有已完成的分析可匯出；新分頁打開 A4 紙本版面並開啟瀏覽器存檔視窗，預設檔名「市場類別-標的-分析-完成日期」 |
 | 追蹤標的評等 | `/tracked-symbol-grades` | 綜合評等 + 盤前 / 盤中 / 盤後時段評等 |
 | 評等回測 | `/grade-backtest` | 命中率總表（並列隨機 50% 作比較）+ 逐筆明細 |
 

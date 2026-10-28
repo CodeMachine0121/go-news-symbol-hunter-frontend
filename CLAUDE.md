@@ -32,7 +32,7 @@
 | 某個實體 / 動作 / enum 該叫什麼 | `../go-symbol-news-hunter/.sdd/UL-MAP.md`（**命名以此為準，不得自創同義詞**）；操作台自己新增的詞彙在本 repo `.sdd/UL-MAP.md` |
 | 後端某個功能的業務規則與驗收條件 | `../go-symbol-news-hunter/.sdd/{YYYY-MM-DD}-{feature-slug}/PRD.md` |
 | 後端端點的實際 request / response | `../go-symbol-news-hunter/postman/`、`internal/controller/`、`internal/domain/models/dto/` |
-| 前端功能切片的需求與設計 | 本 repo `.sdd/{YYYY-MM-DD}-{feature-slug}/`（目前有 `2026-10-17-web-console`；新功能開新資料夾） |
+| 前端功能切片的需求與設計 | 本 repo `.sdd/{YYYY-MM-DD}-{feature-slug}/`（目前有 `2026-10-17-web-console`、`2026-10-28-analysis-result-pdf-export`；新功能開新資料夾） |
 | 後端位址、環境變數 | [README.md](README.md) 的「設定後端位址」；範本是 `.env.example`，`.env` 不進版控 |
 
 - 文件或設定尚未建立時，**不要假設它們存在**；動工前先看實際的 `package.json`、`nuxt.config.ts`、`eslint.config.mjs`、`.stylelintrc.json`、`vitest.config.ts`。

@@ -24,10 +24,11 @@
 | `app/domain/models/dto/analysis-event-dto.ts` | **Modify** | 新增 `isReportExportable: boolean` |
 | `app/pages/analysis-events/[analysisEventId].vue` | **Move + Modify** | 搬到 `[analysisEventId]/index.vue`（否則 Nuxt 會把 `report.vue` 當成它的巢狀子路由）；頁首動作區加「匯出 PDF」 |
 | `app/components/organisms/AnalysisResultReport.vue` | **Modify** | 佐證清單改用新的 `EvidenceList`；新增 `showEvidenceLink` 讓報告印出完整網址 |
-| `KeyEventList.vue`、`RiskFactorList.vue`、`AppCard.vue`、`AppStat.vue` | **Modify（只改樣式）** | 加上 `break-inside: avoid`／列印時去陰影，滿足「不切頁」與紙本外觀 |
-| `app/assets/styles/` | **Modify** | 新增 `print-hidden` mixin 與 `base/_print.scss`（`@page` A4、頁邊距 token） |
+| `KeyEventList.vue`、`RiskFactorList.vue`、`AppCard.vue`、`AppStat.vue` | **Modify（只改樣式）** | 清單項目 `break-inside: avoid`（`keep-on-one-page` mixin）；列印時 `AppCard` 去框線、陰影與內距成為純區塊，`AppStat` 去陰影 |
+| `app/assets/styles/` | **Modify** | 新增 `on-print` mixin（`@media print` 包 `@content`，與 `respond-to` 同型）、`paper` / `paper-margin` token 與 `base/_print.scss`（`@page` A4、標題 `break-after: avoid`、保留背景色） |
 | `app/plugins/dependencies.ts`、`application-injection-keys.ts` | **Modify** | 組裝與 provide `AnalysisReportApplication` |
 | `tests/setup.ts` | **Modify** | stub `definePageMeta`（Nuxt 編譯期 macro，Vitest 下不存在） |
+| `tests/fixtures/console-router.ts` | **Modify** | 可指定 API key 狀態，並註冊報告頁路由 |
 | 新增的 domain / application / proxy / page / layout / 元件 | **Add** | 見 §3 |
 | `SymbolAnalysisService` / `SymbolAnalysisApplication` | **Not touched** | 匯出是新用例，另開 service / application，不擴大既有類別的依賴 |
 | `IAnalysisEventProxy` / 後端 | **Not touched** | 報告用的資料就是既有的分析事件，不需要新端點 |
@@ -47,13 +48,13 @@
 | `BrowserDocumentPrintProxy` | Proxy（`infrastructure/proxy/`） | 暫時把 `document.title` 換成檔名、呼叫 `window.print()`，在 `afterprint` 還原標題 | `window`、`document` | US-02、US-03 |
 | `AnalysisReportService` | Domain Service | `getAnalysisReport(analysisEventId)`：取分析事件 → `toDomain().toReportDto(new Date())`；`printAnalysisReport(analysisReportDto)`：以 `fileName` 開啟存檔視窗 | `IAnalysisEventProxy`、`IDocumentPrintProxy`、`ApiKeyService` | US-02、US-03、US-04 |
 | `AnalysisReportApplication` | Application | 轉呼叫上述兩個用例 | `AnalysisReportService` | US-02 |
-| `pages/analysis-events/[analysisEventId]/report.vue` | Page（Controller） | `layout: 'report'`；`ApiKeyGate` 內載入報告；成功且渲染後（`nextTick`）自動列印**一次**；工具列「匯出 PDF」再次列印、「返回分析事件」 | `AnalysisReportApplication`、`useRequest` | US-02 全部 |
-| `layouts/report.vue` | Layout | 只有紙張寬度的置中容器，沒有側欄與頂列 | — | US-05 不含操作元件 |
-| `AnalysisReportDocument.vue` | Organism | 紙本本體：頁首（標的分析報告、市場類別、標的、分析事件 #、完成時間）＋ `AnalysisResultReport`（`showEvidenceLink`）＋ 頁尾（匯出時間、投資聲明） | `AnalysisResultReport` | US-04、US-05 |
+| `pages/analysis-events/[analysisEventId]/report.vue` | Page（Controller） | `layout: false`，以 `ReportLayout` 排版；`ApiKeyGate` 內載入報告；`AnalysisReportDocument` 真正掛載時（`@vue:mounted`，確保 API key 確認完畢、報告已畫出）自動列印**一次**；工具列「匯出 PDF」再次列印、「返回分析事件」 | `AnalysisReportApplication`、`useRequest` | US-02 全部 |
+| `ReportLayout.vue` | Template | 工具列插槽（列印時隱藏）＋紙張寬度的報告本體插槽，沒有側欄與頂列 | — | US-05 不含操作元件 |
+| `AnalysisReportDocument.vue` | Organism | 紙本本體：頁首（標的分析報告・分析事件 #、「市場類別 標的」標題、分析完成時間）＋ `AnalysisResultReport`（`showEvidenceLink`）＋ 頁尾（匯出時間、投資聲明） | `AnalysisResultReport` | US-04、US-05 |
 | `EvidenceList.vue` | Molecule | 佐證新聞清單（標題連結、來源・時間）；`showLink` 時於標題下印完整網址；每則 `break-inside: avoid` | — | US-04 分析佐證附完整網址、US-05 不切頁 |
-| `print-hidden` mixin + `base/_print.scss` | 樣式 | `@media print { display: none }`；`@page { size: A4 portrait; margin }`、列印時背景色保留（`print-color-adjust: exact`）| — | US-05 |
+| `on-print` / `keep-on-one-page` mixin + `base/_print.scss` | 樣式 | 列印專屬樣式入口與不跨頁；`@page { size: a4 portrait; margin }`、列印時背景色保留（`print-color-adjust: exact`）| — | US-05 |
 
-> 報告頁的「載入 → 渲染 → 列印」由頁面依序呼叫兩個 application method。這是 UI 時序（必須等 DOM 畫好才能列印），不是業務流程拆散給呼叫端排，因此不合併成一個方法。
+> 報告頁的「載入 → 渲染 → 列印」由頁面依序呼叫兩個 application method。列印掛在報告本體的掛載時機，而非載入完成，因為 `ApiKeyGate` 可能仍在確認 API key，此時報告尚未出現在畫面上。這是 UI 時序（必須等 DOM 畫好才能列印），不是業務流程拆散給呼叫端排，因此不合併成一個方法。
 
 ---
 
@@ -94,7 +95,7 @@ flowchart TD
 
 - **Most likely next requirement:** 其他畫面也要匯出（追蹤標的評等、評等回測），或想改成「不經存檔視窗、直接下載」。
 - **Where it lands:**
-  - 新的匯出對象：`report` layout、`print-hidden` mixin、`_print.scss`、`IDocumentPrintProxy` 全部可直接重用；新增「`XxxDomain.toReportDto` + 報告頁 + 紙本 organism」即可，純新增。
+  - 新的匯出對象：`ReportLayout`、`on-print` / `keep-on-one-page` mixin、`_print.scss`、`IDocumentPrintProxy` 全部可直接重用；新增「`XxxDomain.toReportDto` + 報告頁 + 紙本 organism」即可，純新增。
   - 直接下載：換掉 `IDocumentPrintProxy` 的實作（例如改成把報告 DOM 交給 PDF 產生器的 proxy），報告頁與 domain 不動；介面可能需要多帶報告根節點，屆時再擴充。
 - **Patterns applied & why:** Proxy 隔離瀏覽器副作用（可在測試以 `vi.fn()` 替換）；DTO 帶出已算好的檔名與可匯出旗標，元件不寫業務判斷。
 - **Do not hardcode:** 檔名格式、投資聲明、可匯出條件只在 `AnalysisEventDomain`；頁邊距等列印數值只在 token。
@@ -129,7 +130,7 @@ flowchart TD
 | US-04 報告頁尾 | `AnalysisReportDto.exportedAtText` / `disclaimer` + `AnalysisReportDocument` |
 | US-05 黑白列印仍可辨識評等 | `GradeBadge` 永遠帶中文標籤 |
 | US-05 內容超過一頁時延續到下一頁 | `break-inside: avoid`（`EvidenceList`、`KeyEventList`）、`break-after: avoid`（區塊標題） |
-| US-05 PDF 不含操作元件 | `layouts/report.vue` + `print-hidden`（工具列）+ `@page` A4 |
+| US-05 PDF 不含操作元件 | `ReportLayout`（無側欄；工具列 `on-print` 隱藏）+ `@page` A4 |
 
 ---
 
