@@ -75,6 +75,20 @@ describe('SymbolAnalysisApplication', () => {
     expect(symbolAnalysisApplication.getRecentAnalyses()[0]).toMatchObject({ symbol: '2330', symbolLabel, category: { label: '台股' } })
   })
 
+  it.each([
+    { case: 'a Taiwan stock by name', typedText: '台積電', category: 'twStock', symbol: '2330', symbolName: '台積電', symbolLabel: '2330 台積電', categoryLabel: '台股' },
+    { case: 'a US stock by name', typedText: 'Tesla', category: 'usStock', symbol: 'TSLA', symbolName: 'Tesla, Inc.', symbolLabel: 'TSLA Tesla, Inc.', categoryLabel: '美股' },
+    { case: 'a US stock while the US directory is unavailable', typedText: 'Tesla', category: 'usStock', symbol: 'TESLA', symbolName: '', symbolLabel: 'TESLA', categoryLabel: '美股' },
+  ])('remembers the symbol the backend resolved for $case', async ({ typedText, category, symbol, symbolName, symbolLabel, categoryLabel }) => {
+    const { analysisEventProxy, symbolAnalysisApplication } = createApplication()
+    analysisEventProxy.startSymbolAnalysis.mockResolvedValueOnce(new StartedSymbolAnalysis(true, createAnalysisEvent({ analysisEventId: 4, symbol, symbolName, category })))
+
+    const startedSymbolAnalysis = await symbolAnalysisApplication.startSymbolAnalysis(new SymbolQueryDto(typedText, category))
+
+    expect(startedSymbolAnalysis.analysisEvent.analysisEventId).toBe(4)
+    expect(symbolAnalysisApplication.getRecentAnalyses()[0]).toMatchObject({ analysisEventId: 4, symbol, symbolLabel, category: { label: categoryLabel } })
+  })
+
   it('passes on the capacity limit and remembers nothing', async () => {
     const { analysisEventProxy, recentAnalysisStorageProxy, symbolAnalysisApplication } = createApplication()
     analysisEventProxy.startSymbolAnalysis.mockRejectedValue(new BackendRejectionError('analysis_capacity_reached', '目前分析數量已達上限，請稍後再試'))

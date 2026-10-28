@@ -28,6 +28,15 @@ describe('SymbolQueryForm', () => {
     expect(wrapper.emitted('submit')).toEqual([[new SymbolQueryDto('', '')], [new SymbolQueryDto('BTC', 'crypto')]])
   })
 
+  it.each([
+    { case: 'by default', props: {}, expectedPlaceholder: '例如 2330、AAPL、BTC' },
+    { case: 'when the page accepts names', props: { symbolPlaceholder: '例如 2330、台積電、AAPL、Bitcoin' }, expectedPlaceholder: '例如 2330、台積電、AAPL、Bitcoin' },
+  ])('hints at what to type $case', ({ props, expectedPlaceholder }) => {
+    const wrapper = mount(SymbolQueryForm, { props: { categories, submitLabel: '搜尋', ...props } })
+
+    expect(wrapper.find('input').attributes('placeholder')).toBe(expectedPlaceholder)
+  })
+
   it('falls back to no market category when none are offered', async () => {
     const wrapper = mount(SymbolQueryForm, { props: { categories: [], submitLabel: '搜尋' } })
 

@@ -1,10 +1,14 @@
 import { ofetch } from 'ofetch'
 import { BackendRejectionError } from '~/domain/errors/backend-rejection-error'
 import { BackendUnavailableError } from '~/domain/errors/backend-unavailable-error'
+import { SymbolAmbiguousError } from '~/domain/errors/symbol-ambiguous-error'
+import { SymbolCandidateVo } from '~/domain/models/vo/symbol-candidate-vo'
 
 type ErrorBodyWire = {
-  error?: { code?: string, message?: string }
+  error?: { code?: string, message?: string, candidates?: { symbol: string, symbolName?: string }[] }
 }
+
+const SYMBOL_AMBIGUOUS_CODE = 'symbol_ambiguous'
 
 type QueryWire = Record<string, string | undefined>
 
@@ -34,6 +38,10 @@ export class BackendHttpProxy {
       return new BackendResponse(response.status, response._data as T)
     }
     const errorDetail = (response._data as ErrorBodyWire | undefined)?.error
+    if (errorDetail?.code === SYMBOL_AMBIGUOUS_CODE && errorDetail.message !== undefined) {
+      const candidates = (errorDetail.candidates ?? []).map(candidate => new SymbolCandidateVo(candidate.symbol, candidate.symbolName ?? ''))
+      throw new SymbolAmbiguousError(errorDetail.code, errorDetail.message, candidates)
+    }
     if (errorDetail?.code !== undefined && errorDetail.message !== undefined && errorDetail.code !== 'service_unavailable') {
       throw new BackendRejectionError(errorDetail.code, errorDetail.message)
     }
