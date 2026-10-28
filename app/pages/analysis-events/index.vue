@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import AppCard from '~/components/atoms/AppCard.vue'
 import AppPageHeader from '~/components/atoms/AppPageHeader.vue'
 import RequestErrorAlert from '~/components/molecules/RequestErrorAlert.vue'
+import SymbolCandidateList from '~/components/molecules/SymbolCandidateList.vue'
 import SymbolQueryForm from '~/components/molecules/SymbolQueryForm.vue'
 import ApiKeyGate from '~/components/organisms/ApiKeyGate.vue'
 import RecentAnalysisList from '~/components/organisms/RecentAnalysisList.vue'
@@ -10,7 +12,9 @@ import ConsolePageLayout from '~/components/templates/ConsolePageLayout.vue'
 import { SYMBOL_ANALYSIS_APPLICATION } from '~/composables/application-injection-keys'
 import { useApplication } from '~/composables/use-application'
 import { useRequest } from '~/composables/use-request'
-import type { SymbolQueryDto } from '~/domain/models/dto/symbol-query-dto'
+import { SymbolAmbiguousError } from '~/domain/errors/symbol-ambiguous-error'
+import type { SymbolCandidateDto } from '~/domain/models/dto/symbol-candidate-dto'
+import { SymbolQueryDto } from '~/domain/models/dto/symbol-query-dto'
 
 const router = useRouter()
 const symbolAnalysisApplication = useApplication(SYMBOL_ANALYSIS_APPLICATION)
@@ -20,6 +24,20 @@ const symbolAnalysisStart = useRequest(async (symbolQueryDto: SymbolQueryDto) =>
   const startedSymbolAnalysis = await symbolAnalysisApplication.startSymbolAnalysis(symbolQueryDto)
   await router.push(`/analysis-events/${startedSymbolAnalysis.analysisEvent.analysisEventId}`)
 })
+const offeredCandidates = shallowRef<SymbolCandidateDto[]>([])
+// a candidate is started in the market category of the start that offered it
+const offeredCategory = ref('')
+const startAnalysis = async (symbolQueryDto: SymbolQueryDto): Promise<void> => {
+  await symbolAnalysisStart.run(symbolQueryDto)
+  const error = symbolAnalysisStart.error.value
+  offeredCandidates.value = error instanceof SymbolAmbiguousError ? error.candidates : []
+  offeredCategory.value = symbolQueryDto.category
+}
+const startFormAnalysis = (symbolQueryDto: SymbolQueryDto): Promise<void> => {
+  offeredCandidates.value = []
+  return startAnalysis(symbolQueryDto)
+}
+const startCandidateAnalysis = (symbol: string): Promise<void> => startAnalysis(new SymbolQueryDto(symbol, offeredCategory.value))
 </script>
 
 <template>
@@ -36,14 +54,21 @@ const symbolAnalysisStart = useRequest(async (symbolQueryDto: SymbolQueryDto) =>
         <SymbolQueryForm
           :categories="categories"
           submit-label="發起分析"
+          symbol-placeholder="例如 2330、台積電、AAPL、Bitcoin"
           :loading="symbolAnalysisStart.isRunning.value"
-          @submit="symbolAnalysisStart.run"
+          @submit="startFormAnalysis"
         />
       </AppCard>
       <RequestErrorAlert
         v-if="symbolAnalysisStart.error.value"
         :error="symbolAnalysisStart.error.value"
         @retry="symbolAnalysisStart.retry"
+      />
+      <SymbolCandidateList
+        v-if="offeredCandidates.length > 0"
+        :candidates="offeredCandidates"
+        :loading="symbolAnalysisStart.isRunning.value"
+        @choose="startCandidateAnalysis"
       />
     </ApiKeyGate>
     <RecentAnalysisList :recent-analyses="recentAnalyses" />

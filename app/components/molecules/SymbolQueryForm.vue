@@ -11,7 +11,8 @@ const props = withDefaults(defineProps<{
   submitLabel: string
   loading?: boolean
   optional?: boolean
-}>(), { loading: false, optional: false })
+  symbolPlaceholder?: string
+}>(), { loading: false, optional: false, symbolPlaceholder: '例如 2330、AAPL、BTC' })
 
 const emit = defineEmits<{ submit: [SymbolQueryDto] }>()
 
@@ -36,7 +37,7 @@ const symbol = ref('')
       v-model="symbol"
       class="symbol-query-form__symbol"
       label="標的"
-      :placeholder="optional ? '全部標的' : '例如 2330、AAPL、BTC'"
+      :placeholder="optional ? '全部標的' : symbolPlaceholder"
       autocomplete="off"
     />
     <AppButton
