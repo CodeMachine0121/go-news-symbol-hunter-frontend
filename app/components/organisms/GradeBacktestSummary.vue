@@ -85,8 +85,9 @@ defineProps<{
     display: grid;
     gap: spacing('md');
 
+    // four groupings: two by two keeps each table wide enough to read
     @include respond-to('lg') {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 

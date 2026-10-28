@@ -29,12 +29,12 @@ const source = ref('')
   >
     <AppInput
       v-model="completedFrom"
-      label="完成日（起）"
+      label="建立日（起）"
       type="date"
     />
     <AppInput
       v-model="completedTo"
-      label="完成日（迄）"
+      label="建立日（迄）"
       type="date"
     />
     <AppSelect
@@ -75,7 +75,7 @@ const source = ref('')
   }
 
   @include respond-to('lg') {
-    grid-template-columns: repeat(4, 1fr) auto;
+    grid-template-columns: repeat(5, 1fr) auto;
   }
 }
 </style>
