@@ -1,3 +1,4 @@
+import { AnalysisReportApplication } from '~/application/analysis-report-application'
 import { ApiKeyApplication } from '~/application/api-key-application'
 import { BackendHealthApplication } from '~/application/backend-health-application'
 import { GradeBacktestApplication } from '~/application/grade-backtest-application'
@@ -6,6 +7,7 @@ import { SymbolAnalysisApplication } from '~/application/symbol-analysis-applica
 import { TrackedSymbolGradeApplication } from '~/application/tracked-symbol-grade-application'
 import { ApiKeyAccessState } from '~/composables/api-key-access-state'
 import {
+  ANALYSIS_REPORT_APPLICATION,
   API_KEY_ACCESS_STATE,
   API_KEY_APPLICATION,
   BACKEND_HEALTH_APPLICATION,
@@ -14,6 +16,7 @@ import {
   SYMBOL_ANALYSIS_APPLICATION,
   TRACKED_SYMBOL_GRADE_APPLICATION,
 } from '~/composables/application-injection-keys'
+import { AnalysisReportService } from '~/domain/service/analysis-report-service'
 import { ApiKeyService } from '~/domain/service/api-key-service'
 import { BackendHealthService } from '~/domain/service/backend-health-service'
 import { GradeBacktestService } from '~/domain/service/grade-backtest-service'
@@ -25,6 +28,7 @@ import { AnalysisEventProxy } from '~/infrastructure/proxy/analysis-event-proxy'
 import { ApiKeyProxy } from '~/infrastructure/proxy/api-key-proxy'
 import { BackendHealthProxy } from '~/infrastructure/proxy/backend-health-proxy'
 import { BackendHttpProxy } from '~/infrastructure/proxy/backend-http-proxy'
+import { BrowserDocumentPrintProxy } from '~/infrastructure/proxy/browser-document-print-proxy'
 import { GradeBacktestProxy } from '~/infrastructure/proxy/grade-backtest-proxy'
 import { LocalStorageApiKeyStorageProxy } from '~/infrastructure/proxy/local-storage-api-key-storage-proxy'
 import { LocalStorageRecentAnalysisStorageProxy } from '~/infrastructure/proxy/local-storage-recent-analysis-storage-proxy'
@@ -35,6 +39,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const backendHttpProxy = new BackendHttpProxy(useRuntimeConfig().public.backendBaseUrl)
   const apiKeyService = new ApiKeyService(new ApiKeyProxy(backendHttpProxy), new LocalStorageApiKeyStorageProxy())
   const marketCategoryService = new MarketCategoryService()
+  const analysisEventProxy = new AnalysisEventProxy(backendHttpProxy)
 
   nuxtApp.vueApp.provide(API_KEY_ACCESS_STATE, new ApiKeyAccessState())
   nuxtApp.vueApp.provide(API_KEY_APPLICATION, new ApiKeyApplication(apiKeyService))
@@ -43,8 +48,11 @@ export default defineNuxtPlugin((nuxtApp) => {
     marketCategoryService,
   ))
   nuxtApp.vueApp.provide(SYMBOL_ANALYSIS_APPLICATION, new SymbolAnalysisApplication(
-    new SymbolAnalysisService(new AnalysisEventProxy(backendHttpProxy), new LocalStorageRecentAnalysisStorageProxy(), apiKeyService),
+    new SymbolAnalysisService(analysisEventProxy, new LocalStorageRecentAnalysisStorageProxy(), apiKeyService),
     marketCategoryService,
+  ))
+  nuxtApp.vueApp.provide(ANALYSIS_REPORT_APPLICATION, new AnalysisReportApplication(
+    new AnalysisReportService(analysisEventProxy, new BrowserDocumentPrintProxy(), apiKeyService),
   ))
   nuxtApp.vueApp.provide(TRACKED_SYMBOL_GRADE_APPLICATION, new TrackedSymbolGradeApplication(
     new TrackedSymbolGradeService(new TrackedSymbolGradeProxy(backendHttpProxy), apiKeyService),
