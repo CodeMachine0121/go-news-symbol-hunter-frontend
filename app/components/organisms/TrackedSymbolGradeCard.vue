@@ -18,7 +18,7 @@ const isExpanded = ref(false)
   <AppCard>
     <div class="tracked-symbol-grade-card__summary">
       <div class="tracked-symbol-grade-card__identity">
-        <strong class="tracked-symbol-grade-card__symbol">{{ trackedSymbolGrade.symbol }}</strong>
+        <strong class="tracked-symbol-grade-card__symbol">{{ trackedSymbolGrade.symbolLabel }}</strong>
         <span class="tracked-symbol-grade-card__muted">{{ trackedSymbolGrade.category.label }}・交易日 {{ trackedSymbolGrade.tradingDay }}</span>
       </div>
       <dl class="tracked-symbol-grade-card__figures">

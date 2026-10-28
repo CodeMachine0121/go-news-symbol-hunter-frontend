@@ -24,6 +24,12 @@ const mountReport = (result: AnalysisResult) => mount(AnalysisReportDocument, {
 })
 
 describe('AnalysisReportDocument', () => {
+  it('heads the report with the symbol and its name', () => {
+    const report = createAnalysisEvent({ symbol: '2330', symbolName: '台積電', category: 'twStock', status: 'succeeded', result: analysisResult() }).toDomain().toReportDto(EXPORTED_AT)
+
+    expect(mount(AnalysisReportDocument, { props: { report } }).find('h1').text()).toBe('台股 2330 台積電')
+  })
+
   it('heads the report with the symbol, market category, analysis event and completion time', () => {
     const header = mountReport(analysisResult()).find('header').text()
 

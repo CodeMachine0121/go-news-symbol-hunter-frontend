@@ -28,7 +28,7 @@ defineProps<{
           class="recent-analysis-list__link"
           :to="`/analysis-events/${recentAnalysis.analysisEventId}`"
         >
-          <span class="recent-analysis-list__symbol">{{ recentAnalysis.category.label }} {{ recentAnalysis.symbol }}</span>
+          <span class="recent-analysis-list__symbol">{{ recentAnalysis.category.label }} {{ recentAnalysis.symbolLabel }}</span>
           <span class="recent-analysis-list__time">{{ recentAnalysis.startedAtText }}</span>
         </NuxtLink>
       </li>

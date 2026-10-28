@@ -4,6 +4,7 @@ export class RecentAnalysisDto {
   constructor(
     readonly analysisEventId: number,
     readonly symbol: string,
+    readonly symbolLabel: string,
     readonly category: LabelledValueDto,
     readonly startedAtText: string,
   ) {}

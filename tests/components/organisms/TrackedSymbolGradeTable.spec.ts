@@ -4,6 +4,15 @@ import TrackedSymbolGradeTable from '~/components/organisms/TrackedSymbolGradeTa
 import { createTrackedSymbolGrade } from '../../fixtures/entity-fixtures'
 
 describe('TrackedSymbolGradeTable', () => {
+  it.each([
+    { case: 'with its name', symbolName: '台積電', symbolLabel: '2330 台積電' },
+    { case: 'without a name', symbolName: '', symbolLabel: '2330' },
+  ])('shows the tracked symbol $case', ({ symbolName, symbolLabel }) => {
+    const wrapper = mount(TrackedSymbolGradeTable, { props: { trackedSymbolGrades: [createTrackedSymbolGrade(['preMarket'], symbolName).toDomain().toDto()] } })
+
+    expect(wrapper.find('strong').text()).toBe(symbolLabel)
+  })
+
   it('lists the combined grade of each tracked symbol', () => {
     const text = mount(TrackedSymbolGradeTable, { props: { trackedSymbolGrades: [createTrackedSymbolGrade().toDomain().toDto()] } }).text()
 

@@ -5,6 +5,7 @@ export class AnalysisEventDto {
   constructor(
     readonly analysisEventId: number,
     readonly symbol: string,
+    readonly symbolLabel: string,
     readonly category: LabelledValueDto,
     readonly status: LabelledValueDto,
     readonly failureMessage: string | undefined,

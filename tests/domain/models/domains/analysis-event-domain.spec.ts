@@ -79,10 +79,22 @@ describe('AnalysisEventDomain report', () => {
     { case: 'Taiwan stock', category: 'twStock', symbol: '2330', createdAt: new Date('2026-10-28T01:15:00Z'), fileName: '台股-2330-分析-2026-10-28' },
     { case: 'US stock', category: 'usStock', symbol: 'AAPL', createdAt: new Date('2026-10-27T05:00:00Z'), fileName: '美股-AAPL-分析-2026-10-27' },
     { case: 'completion at 23:59 Taipei time', category: 'crypto', symbol: 'BTC', createdAt: new Date('2026-10-28T15:59:00Z'), fileName: '加密貨幣-BTC-分析-2026-10-28' },
-  ])('names the report file for $case', ({ category, symbol, createdAt, fileName }) => {
-    const analysisReport = createAnalysisEvent({ category, symbol, status: 'succeeded', result: createAnalysisResult({ createdAt }) }).toDomain().toReportDto(exportedAt)
+    { case: 'a symbol with its name', category: 'twStock', symbol: '2330', symbolName: '台積電', createdAt: new Date('2026-10-28T01:15:00Z'), fileName: '台股-2330-台積電-分析-2026-10-28' },
+    { case: 'a symbol whose name is empty', category: 'twStock', symbol: '2317', symbolName: '', createdAt: new Date('2026-10-28T01:15:00Z'), fileName: '台股-2317-分析-2026-10-28' },
+  ])('names the report file for $case', ({ category, symbol, symbolName, createdAt, fileName }) => {
+    const analysisReport = createAnalysisEvent({ category, symbol, symbolName, status: 'succeeded', result: createAnalysisResult({ createdAt }) }).toDomain().toReportDto(exportedAt)
 
     expect(analysisReport.fileName).toBe(fileName)
+  })
+
+  it.each([
+    { case: 'with its name', symbolName: '台積電', symbolLabel: '2330 台積電' },
+    { case: 'without a name', symbolName: '', symbolLabel: '2330' },
+  ])('writes the symbol $case on the analysis event and its report', ({ symbolName, symbolLabel }) => {
+    const analysisEvent = createAnalysisEvent({ symbol: '2330', symbolName, category: 'twStock', status: 'succeeded', result: createAnalysisResult() }).toDomain()
+
+    expect(analysisEvent.toDto(exportedAt).symbolLabel).toBe(symbolLabel)
+    expect(analysisEvent.toReportDto(exportedAt).symbolLabel).toBe(symbolLabel)
   })
 
   it('carries the report header, footer and the analysis result', () => {

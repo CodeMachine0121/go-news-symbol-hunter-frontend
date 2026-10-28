@@ -7,6 +7,8 @@ import type { BackendHttpProxy } from '~/infrastructure/proxy/backend-http-proxy
 
 type TrackedSymbolGradeWire = {
   symbol: string
+  // older backends do not send it
+  symbolName?: string
   category: string
   tradingDay: string
   grade: string
@@ -35,6 +37,7 @@ export class TrackedSymbolGradeProxy implements ITrackedSymbolGradeProxy {
     })
     return (response.body ?? []).map(trackedSymbolGrade => new TrackedSymbolGrade(
       trackedSymbolGrade.symbol,
+      trackedSymbolGrade.symbolName ?? '',
       trackedSymbolGrade.category,
       trackedSymbolGrade.tradingDay,
       trackedSymbolGrade.grade,

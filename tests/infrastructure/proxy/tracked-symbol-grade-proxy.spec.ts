@@ -30,6 +30,15 @@ describe('TrackedSymbolGradeProxy', () => {
     expect(trackedSymbolGrades[0]?.sessionGrades[0]).toMatchObject({ session: 'preMarket', keyEvents: [], riskFactors: [], evidence: [] })
   })
 
+  it.each([
+    { case: 'with a name', symbolName: '台積電', expected: '台積電' },
+    { case: 'from a backend that sends no name', symbolName: undefined, expected: '' },
+  ])('reads the symbol name $case', async ({ symbolName, expected }) => {
+    stubFetch(jsonResponse(200, [{ symbol: '2330', symbolName, category: 'twStock', tradingDay: '2026-10-16', grade: 'neutral', combinedScore: 0, confidence: 50, updatedAt: '2026-10-16T05:00:00Z', sessionGrades: null }]))
+
+    expect((await createProxy().getTrackedSymbolGrades(undefined, 'key'))[0]?.symbolName).toBe(expected)
+  })
+
   it('reads every tracked symbol and tolerates empty answers', async () => {
     const fetchStub = stubFetch(jsonResponse(200, [{ symbol: '2330', category: 'twStock', tradingDay: '2026-10-16', grade: 'neutral', combinedScore: 0, confidence: 50, updatedAt: '2026-10-16T05:00:00Z', sessionGrades: null }]), jsonResponse(200, null))
 

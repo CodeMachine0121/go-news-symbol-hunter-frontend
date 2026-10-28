@@ -21,7 +21,7 @@ export class SymbolAnalysisService {
     const startedSymbolAnalysis = await this.analysisEventProxy.startSymbolAnalysis(symbolQuery, this.apiKeyService.requireApiKey())
     const analysisEvent = startedSymbolAnalysis.analysisEvent
     const recentAnalyses = new RecentAnalysisListDomain(this.recentAnalysisStorageProxy.read())
-      .remember(new RecentAnalysis(analysisEvent.analysisEventId, analysisEvent.symbol, analysisEvent.category, analysisEvent.startedAt))
+      .remember(new RecentAnalysis(analysisEvent.analysisEventId, analysisEvent.symbol, analysisEvent.symbolName, analysisEvent.category, analysisEvent.startedAt))
     this.recentAnalysisStorageProxy.save(recentAnalyses.toEntities())
     return new StartedSymbolAnalysisDto(startedSymbolAnalysis.isNew, analysisEvent.toDomain().toDto(new Date()))
   }

@@ -6,6 +6,8 @@ const RECENT_ANALYSES_STORAGE_KEY = 'go-symbol-news-hunter.recent-analyses'
 type RecentAnalysisWire = {
   analysisEventId: number
   symbol: string
+  // analyses remembered before symbol names existed have none
+  symbolName?: string
   category: string
   startedAt: string
 }
@@ -17,6 +19,7 @@ export class LocalStorageRecentAnalysisStorageProxy implements IRecentAnalysisSt
       return recentAnalyses.map(recentAnalysis => new RecentAnalysis(
         recentAnalysis.analysisEventId,
         recentAnalysis.symbol,
+        recentAnalysis.symbolName ?? '',
         recentAnalysis.category,
         new Date(recentAnalysis.startedAt),
       ))
@@ -30,6 +33,7 @@ export class LocalStorageRecentAnalysisStorageProxy implements IRecentAnalysisSt
     const recentAnalysesWire: RecentAnalysisWire[] = recentAnalyses.map(recentAnalysis => ({
       analysisEventId: recentAnalysis.analysisEventId,
       symbol: recentAnalysis.symbol,
+      symbolName: recentAnalysis.symbolName,
       category: recentAnalysis.category,
       startedAt: recentAnalysis.startedAt.toISOString(),
     }))

@@ -14,7 +14,7 @@ defineProps<{
         標的分析報告・分析事件 #{{ report.analysisEventId }}
       </p>
       <h1 class="analysis-report-document__title">
-        {{ report.category.label }} {{ report.symbol }}
+        {{ report.category.label }} {{ report.symbolLabel }}
       </h1>
       <p class="analysis-report-document__completed-at">
         分析完成時間 {{ report.result.createdAtText }}
