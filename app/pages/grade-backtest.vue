@@ -14,6 +14,7 @@ import type { GradeBacktestQueryDto } from '~/domain/models/dto/grade-backtest-q
 
 const gradeBacktestApplication = useApplication(GRADE_BACKTEST_APPLICATION)
 const categories = gradeBacktestApplication.listMarketCategories()
+const sources = gradeBacktestApplication.listGradeSources()
 const gradeBacktest = useRequest((gradeBacktestQueryDto: GradeBacktestQueryDto) => gradeBacktestApplication.getGradeBacktest(gradeBacktestQueryDto))
 </script>
 
@@ -21,12 +22,13 @@ const gradeBacktest = useRequest((gradeBacktestQueryDto: GradeBacktestQueryDto) 
   <ConsolePageLayout>
     <AppPageHeader
       title="評等回測"
-      description="比較分析完成時的價格與檢查點收盤價，檢驗評等方向是否優於隨機猜測。"
+      description="比較評等紀錄建立時的價格與檢查點收盤價，檢驗手動分析與追蹤標的評等的方向是否優於隨機猜測。"
     />
     <ApiKeyGate>
       <AppCard>
         <BacktestQueryForm
           :categories="categories"
+          :sources="sources"
           :loading="gradeBacktest.isRunning.value"
           @submit="gradeBacktest.run"
         />

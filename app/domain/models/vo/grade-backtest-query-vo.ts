@@ -5,5 +5,6 @@ export class GradeBacktestQueryVo {
     readonly completedFrom: string | undefined,
     readonly completedTo: string | undefined,
     readonly symbolQuery: SymbolQueryVo | undefined,
+    readonly source: string | undefined,
   ) {}
 }

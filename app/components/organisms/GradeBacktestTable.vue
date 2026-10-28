@@ -13,10 +13,10 @@ defineProps<{
 <template>
   <AppCard
     title="逐筆明細"
-    :description="`共 ${analyses.length} 筆分析`"
+    :description="`共 ${analyses.length} 筆評等紀錄`"
   >
     <AppEmptyState v-if="analyses.length === 0">
-      這段期間沒有已完成的分析
+      這段期間沒有評等紀錄
     </AppEmptyState>
     <div
       v-else
@@ -26,10 +26,12 @@ defineProps<{
         <thead>
           <tr>
             <th>標的</th>
+            <th>來源</th>
             <th>評等</th>
             <th>信心</th>
             <th>時間範圍</th>
-            <th>完成時間</th>
+            <th>建立時間</th>
+            <th>交易日</th>
             <th>起點價格</th>
             <th>檢查日</th>
             <th>檢查點價格</th>
@@ -40,20 +42,26 @@ defineProps<{
         <tbody>
           <tr
             v-for="analysis in analyses"
-            :key="analysis.analysisEventId"
+            :key="analysis.gradeRecordId"
           >
             <td>
               <NuxtLink
+                v-if="analysis.linksToAnalysisEvent"
                 class="grade-backtest-table__link"
                 :to="`/analysis-events/${analysis.analysisEventId}`"
               >
                 {{ analysis.category.label }} {{ analysis.symbol }}
               </NuxtLink>
+              <template v-else>
+                {{ analysis.category.label }} {{ analysis.symbol }}
+              </template>
             </td>
+            <td>{{ analysis.source.label }}</td>
             <td><GradeBadge :value="analysis.grade" /></td>
             <td>{{ analysis.confidence }}</td>
             <td>{{ analysis.timeHorizon.label }}</td>
             <td>{{ analysis.completedAtText }}</td>
+            <td>{{ analysis.tradingDayText }}</td>
             <td>{{ analysis.entryPriceText }}</td>
             <td>{{ analysis.checkpointDateText }}</td>
             <td>{{ analysis.checkpointPriceText }}</td>

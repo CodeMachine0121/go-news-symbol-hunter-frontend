@@ -12,5 +12,6 @@ export class GradeBacktestDto {
     readonly outcomeCounts: OutcomeCountDto[],
     readonly neutralAverageChangeRateText: string,
     readonly analyses: AnalysisBacktestDto[],
+    readonly bySource: HitRateDto[],
   ) {}
 }

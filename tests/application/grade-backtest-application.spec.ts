@@ -26,12 +26,12 @@ describe('GradeBacktestApplication', () => {
 
   it('queries the backtest for a period and a symbol', async () => {
     const { gradeBacktestProxy, gradeBacktestApplication } = createApplication()
-    gradeBacktestProxy.getGradeBacktest.mockResolvedValue(new GradeBacktest(0.5, new HitRate(26, 14, 0.65), new Map(), new Map(), new Map(), undefined, new Map(), []))
+    gradeBacktestProxy.getGradeBacktest.mockResolvedValue(new GradeBacktest(0.5, new HitRate(26, 14, 0.65), new Map(), new Map(), new Map(), undefined, new Map(), [], new Map()))
 
-    const gradeBacktest = await gradeBacktestApplication.getGradeBacktest(new GradeBacktestQueryDto('2026-10-01', '2026-10-31', '2330', 'twStock'))
+    const gradeBacktest = await gradeBacktestApplication.getGradeBacktest(new GradeBacktestQueryDto('2026-10-01', '2026-10-31', '2330', 'twStock', ''))
 
     expect(gradeBacktestProxy.getGradeBacktest).toHaveBeenCalledWith(
-      expect.objectContaining({ completedFrom: '2026-10-01', completedTo: '2026-10-31', symbolQuery: expect.objectContaining({ symbol: '2330', category: 'twStock' }) }),
+      expect.objectContaining({ completedFrom: '2026-10-01', completedTo: '2026-10-31', symbolQuery: expect.objectContaining({ symbol: '2330', category: 'twStock' }), source: undefined }),
       'api-key',
     )
     expect(gradeBacktest.overall.hitRateText).toBe('65%')
@@ -39,8 +39,8 @@ describe('GradeBacktestApplication', () => {
   })
 
   it.each([
-    { query: new GradeBacktestQueryDto('2026-10-10', '2026-10-01', '', ''), message: '期間不正確' },
-    { query: new GradeBacktestQueryDto('', '', '2330', ''), message: '標的與市場類別需一起提供' },
+    { query: new GradeBacktestQueryDto('2026-10-10', '2026-10-01', '', '', ''), message: '期間不正確' },
+    { query: new GradeBacktestQueryDto('', '', '2330', '', ''), message: '標的與市場類別需一起提供' },
   ])('does not query when $message', async ({ query, message }) => {
     const { gradeBacktestProxy, gradeBacktestApplication } = createApplication()
 
@@ -49,12 +49,30 @@ describe('GradeBacktestApplication', () => {
   })
 
   it.each([
-    { code: 'backtest_analysis_limit_exceeded', message: '涵蓋分析超過 500 筆，請縮小期間' },
+    { code: 'backtest_analysis_limit_exceeded', message: '涵蓋評等紀錄超過 500 筆，請縮小期間' },
+    { code: 'grade_source_invalid', message: '來源不正確' },
     { code: 'price_service_unavailable', message: '價格服務暫時無法使用' },
   ])('passes on 「$message」', async ({ code, message }) => {
     const { gradeBacktestProxy, gradeBacktestApplication } = createApplication()
     gradeBacktestProxy.getGradeBacktest.mockRejectedValue(new BackendRejectionError(code, message))
 
-    await expect(gradeBacktestApplication.getGradeBacktest(new GradeBacktestQueryDto('', '', '', ''))).rejects.toThrow(message)
+    await expect(gradeBacktestApplication.getGradeBacktest(new GradeBacktestQueryDto('', '', '', '', ''))).rejects.toThrow(message)
+  })
+
+  it('lists the grade sources to choose from, manual first', () => {
+    expect(createApplication().gradeBacktestApplication.listGradeSources().map(source => [source.value, source.label])).toEqual([['manual', '手動'], ['background', '背景']])
+  })
+
+  it.each([
+    { source: 'background', expectedSource: 'background' },
+    { source: 'manual', expectedSource: 'manual' },
+    { source: '', expectedSource: undefined },
+  ])('queries grade source "$source" as $expectedSource', async ({ source, expectedSource }) => {
+    const { gradeBacktestProxy, gradeBacktestApplication } = createApplication()
+    gradeBacktestProxy.getGradeBacktest.mockResolvedValue(new GradeBacktest(0.5, new HitRate(0, 0, undefined), new Map(), new Map(), new Map(), undefined, new Map(), [], new Map()))
+
+    await gradeBacktestApplication.getGradeBacktest(new GradeBacktestQueryDto('', '', '', '', source))
+
+    expect(gradeBacktestProxy.getGradeBacktest.mock.calls[0]?.[0].source).toBe(expectedSource)
   })
 })

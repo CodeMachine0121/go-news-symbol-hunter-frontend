@@ -13,6 +13,7 @@ export class GradeBacktest {
     readonly neutralAverageChangeRate: Decimal | undefined,
     readonly outcomeCounts: Map<string, number>,
     readonly analyses: AnalysisBacktest[],
+    readonly bySource: Map<string, HitRate>,
   ) {}
 
   toDomain(): GradeBacktestDomain {

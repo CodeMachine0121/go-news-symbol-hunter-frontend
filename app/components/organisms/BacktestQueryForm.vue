@@ -8,6 +8,7 @@ import type { LabelledValueDto } from '~/domain/models/dto/labelled-value-dto'
 
 defineProps<{
   categories: LabelledValueDto[]
+  sources: LabelledValueDto[]
   loading: boolean
 }>()
 
@@ -17,22 +18,23 @@ const completedFrom = ref('')
 const completedTo = ref('')
 const category = ref('')
 const symbol = ref('')
+const source = ref('')
 </script>
 
 <template>
   <form
     class="backtest-query-form"
     novalidate
-    @submit.prevent="emit('submit', new GradeBacktestQueryDto(completedFrom, completedTo, symbol, category))"
+    @submit.prevent="emit('submit', new GradeBacktestQueryDto(completedFrom, completedTo, symbol, category, source))"
   >
     <AppInput
       v-model="completedFrom"
-      label="完成日（起）"
+      label="建立日（起）"
       type="date"
     />
     <AppInput
       v-model="completedTo"
-      label="完成日（迄）"
+      label="建立日（迄）"
       type="date"
     />
     <AppSelect
@@ -46,6 +48,12 @@ const symbol = ref('')
       label="標的"
       placeholder="全部標的"
       autocomplete="off"
+    />
+    <AppSelect
+      v-model="source"
+      label="評等來源"
+      :options="sources"
+      placeholder="全部"
     />
     <AppButton
       type="submit"
@@ -67,7 +75,7 @@ const symbol = ref('')
   }
 
   @include respond-to('lg') {
-    grid-template-columns: repeat(4, 1fr) auto;
+    grid-template-columns: repeat(5, 1fr) auto;
   }
 }
 </style>

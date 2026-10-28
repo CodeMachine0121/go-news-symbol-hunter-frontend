@@ -8,6 +8,7 @@ import { HitRate } from '~/domain/models/entities/hit-rate'
 import { BACKTEST_OUTCOMES, BacktestOutcomeDomain } from '~/domain/models/domains/backtest-outcome-domain'
 import { CONFIDENCE_BANDS, ConfidenceBandDomain } from '~/domain/models/domains/confidence-band-domain'
 import { GRADES, GradeDomain } from '~/domain/models/domains/grade-domain'
+import { GRADE_SOURCES, GradeSourceDomain } from '~/domain/models/domains/grade-source-domain'
 import { MARKET_CATEGORIES, MarketCategoryDomain } from '~/domain/models/domains/market-category-domain'
 import { TimeHorizonDomain } from '~/domain/models/domains/time-horizon-domain'
 import { RatioDomain } from '~/domain/models/domains/ratio-domain'
@@ -52,7 +53,12 @@ export class GradeBacktestDomain {
         analysis.checkpointPrice?.toFixed() ?? NOT_AVAILABLE,
         analysis.priceChangeRate === undefined ? NOT_AVAILABLE : new RatioDomain(analysis.priceChangeRate).toExactSignedPercentText(),
         new BacktestOutcomeDomain(analysis.outcome).toDto(),
+        analysis.gradeRecordId,
+        new GradeSourceDomain(analysis.source).toDto(),
+        analysis.tradingDay ?? NOT_AVAILABLE,
+        analysis.analysisEventId !== undefined,
       )),
+      toGroupDtos(this.gradeBacktest.bySource, GRADE_SOURCES, source => new GradeSourceDomain(source).toDto()),
     )
   }
 }

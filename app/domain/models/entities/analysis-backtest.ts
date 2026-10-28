@@ -2,7 +2,8 @@ import type Decimal from 'decimal.js'
 
 export class AnalysisBacktest {
   constructor(
-    readonly analysisEventId: number,
+    // only manual grade records belong to an analysis event
+    readonly analysisEventId: number | undefined,
     readonly symbol: string,
     readonly category: string,
     readonly grade: string,
@@ -14,5 +15,9 @@ export class AnalysisBacktest {
     readonly checkpointPrice: Decimal | undefined,
     readonly priceChangeRate: Decimal | undefined,
     readonly outcome: string,
+    readonly gradeRecordId: number,
+    readonly source: string,
+    // only background grade records have a trading day
+    readonly tradingDay: string | undefined,
   ) {}
 }
