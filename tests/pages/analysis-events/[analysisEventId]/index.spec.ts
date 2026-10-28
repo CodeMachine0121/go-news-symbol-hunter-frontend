@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { POLLING_INTERVAL_MILLISECONDS } from '~/composables/use-analysis-event-polling'
 import { BackendRejectionError } from '~/domain/errors/backend-rejection-error'
 import { StartedSymbolAnalysis } from '~/domain/models/entities/started-symbol-analysis'
-import { STARTED_AT, createAnalysisEvent } from '../../fixtures/entity-fixtures'
-import { mountAnalysisRoutes } from '../../fixtures/console-router'
+import { STARTED_AT, createAnalysisEvent, createAnalysisResult } from '../../../fixtures/entity-fixtures'
+import { mountAnalysisRoutes } from '../../../fixtures/console-router'
 
 describe('analysis event page', () => {
   beforeEach(() => {
@@ -72,5 +72,57 @@ describe('analysis event page', () => {
     await flushPromises()
 
     expect(stack.analysisEventProxy.getAnalysisEvent).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('analysis event page export', () => {
+  const exportLinkOf = (wrapper: Awaited<ReturnType<typeof mountAnalysisRoutes>>['wrapper']) =>
+    wrapper.findAllComponents({ name: 'RouterLinkStub' }).find(link => link.text() === '匯出 PDF')
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+    vi.setSystemTime(new Date(STARTED_AT.getTime() + 60 * 1000))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('offers to export a completed analysis as a report in a new tab', async () => {
+    const { stack, router, wrapper } = await mountAnalysisRoutes('/analysis-events')
+    stack.analysisEventProxy.getAnalysisEvent.mockResolvedValue(createAnalysisEvent({ analysisEventId: 42, status: 'succeeded', result: createAnalysisResult() }))
+
+    await router.push('/analysis-events/42')
+    await flushPromises()
+    const exportLink = exportLinkOf(wrapper)
+
+    expect(exportLink?.props('to')).toBe('/analysis-events/42/report')
+    expect(exportLink?.attributes('target')).toBe('_blank')
+    expect(router.currentRoute.value.fullPath).toBe('/analysis-events/42')
+  })
+
+  it.each(['running', 'failed'])('offers no export while the analysis is %s', async (status) => {
+    const { stack, router, wrapper } = await mountAnalysisRoutes('/analysis-events')
+    stack.analysisEventProxy.getAnalysisEvent.mockResolvedValue(createAnalysisEvent({ analysisEventId: 42, status, failureReason: 'AI 服務暫時無法使用' }))
+
+    await router.push('/analysis-events/42')
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('匯出 PDF')
+  })
+
+  it('offers the export as soon as the running analysis completes', async () => {
+    const { stack, router, wrapper } = await mountAnalysisRoutes('/analysis-events')
+    stack.analysisEventProxy.getAnalysisEvent
+      .mockResolvedValueOnce(createAnalysisEvent({ analysisEventId: 42, status: 'running' }))
+      .mockResolvedValue(createAnalysisEvent({ analysisEventId: 42, status: 'succeeded', result: createAnalysisResult() }))
+    await router.push('/analysis-events/42')
+    await flushPromises()
+    expect(wrapper.text()).not.toContain('匯出 PDF')
+
+    await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_MILLISECONDS)
+    await flushPromises()
+
+    expect(exportLinkOf(wrapper)?.props('to')).toBe('/analysis-events/42/report')
   })
 })
