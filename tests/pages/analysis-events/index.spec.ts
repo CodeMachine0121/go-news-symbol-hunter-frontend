@@ -163,10 +163,13 @@ describe('analysis events page', () => {
   it('lists every candidate even when two share a symbol', async () => {
     const { stack, wrapper } = await mountAnalysisRoutes('/analysis-events')
     stack.analysisEventProxy.startSymbolAnalysis.mockRejectedValue(new SymbolAmbiguousError('symbol_ambiguous', '符合多個標的，請改填代號或更完整的名稱', [new SymbolCandidateVo('USDT', 'Tether'), new SymbolCandidateVo('USDT', 'Bridged USDT')]))
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     await startCathayAnalysis(wrapper)
 
     expect(candidateButtons(wrapper).map(button => button.text())).toEqual(['USDT Tether', 'USDT Bridged USDT'])
+    expect(consoleWarn.mock.calls.flat().join(' ')).not.toContain('Duplicate keys')
+    consoleWarn.mockRestore()
   })
 
   it('drops the offered candidates as soon as a new search is sent from the form', async () => {
