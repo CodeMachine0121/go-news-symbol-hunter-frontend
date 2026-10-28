@@ -26,6 +26,10 @@ defineProps<{
   gap: spacing('2xs');
   padding: spacing('md');
 
+  @include on-print {
+    box-shadow: none;
+  }
+
   &__label {
     @include caption;
   }

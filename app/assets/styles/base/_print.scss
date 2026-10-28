@@ -1,0 +1,21 @@
+@use 'sass:map';
+@use '../abstracts' as *;
+@use '../abstracts/tokens';
+
+@page {
+  size: a4 portrait;
+  margin: map.get(tokens.$sizes, 'paper-margin');
+}
+
+@media print {
+  body {
+    background: color('surface');
+    print-color-adjust: exact;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+}

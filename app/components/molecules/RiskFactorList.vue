@@ -23,6 +23,8 @@ defineProps<{
   gap: spacing('2xs');
 
   &__item {
+    @include keep-on-one-page;
+
     padding: spacing('xs') spacing('sm');
     background: color('warning-soft');
     border-radius: radius('sm');

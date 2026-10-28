@@ -17,3 +17,13 @@
   font-size: font-size('xs');
   font-weight: font-weight('medium');
 }
+
+@mixin on-print {
+  @media print {
+    @content;
+  }
+}
+
+@mixin keep-on-one-page {
+  break-inside: avoid;
+}

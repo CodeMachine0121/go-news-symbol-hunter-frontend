@@ -2,14 +2,18 @@
 import AppCard from '~/components/atoms/AppCard.vue'
 import AppEmptyState from '~/components/atoms/AppEmptyState.vue'
 import AppStat from '~/components/atoms/AppStat.vue'
+import EvidenceList from '~/components/molecules/EvidenceList.vue'
 import GradeBadge from '~/components/molecules/GradeBadge.vue'
 import KeyEventList from '~/components/molecules/KeyEventList.vue'
 import RiskFactorList from '~/components/molecules/RiskFactorList.vue'
 import type { AnalysisResultDto } from '~/domain/models/dto/analysis-result-dto'
 
-defineProps<{
+withDefaults(defineProps<{
   result: AnalysisResultDto
-}>()
+  showEvidenceLink?: boolean
+}>(), {
+  showEvidenceLink: false,
+})
 </script>
 
 <template>
@@ -57,20 +61,10 @@ defineProps<{
       title="分析佐證"
       :description="`本次分析參考的 ${result.evidence.length} 則新聞`"
     >
-      <ul class="analysis-result-report__evidence">
-        <li
-          v-for="evidence in result.evidence"
-          :key="evidence.link"
-          class="analysis-result-report__evidence-item"
-        >
-          <a
-            :href="evidence.link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >{{ evidence.title }}</a>
-          <span class="analysis-result-report__evidence-meta">{{ evidence.providerName }}・{{ evidence.publishedAtText }}</span>
-        </li>
-      </ul>
+      <EvidenceList
+        :evidence="result.evidence"
+        :show-link="showEvidenceLink"
+      />
     </AppCard>
   </div>
 </template>
@@ -102,22 +96,6 @@ defineProps<{
 
   &__reason {
     white-space: pre-line;
-  }
-
-  &__evidence {
-    display: flex;
-    flex-direction: column;
-    gap: spacing('xs');
-  }
-
-  &__evidence-item {
-    display: flex;
-    flex-direction: column;
-  }
-
-  &__evidence-meta {
-    color: color('text-muted');
-    font-size: font-size('xs');
   }
 }
 </style>

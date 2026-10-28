@@ -31,6 +31,8 @@ defineProps<{
   gap: spacing('xs');
 
   &__item {
+    @include keep-on-one-page;
+
     display: flex;
     flex-direction: column;
     gap: spacing('3xs');

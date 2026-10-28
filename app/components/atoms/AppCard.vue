@@ -34,8 +34,13 @@ defineProps<{
   gap: spacing('md');
   padding: spacing('lg');
 
+  @include on-print {
+    box-shadow: none;
+  }
+
   &__header {
     display: flex;
+    break-after: avoid;
     flex-direction: column;
   }
 
