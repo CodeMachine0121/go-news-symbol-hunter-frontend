@@ -12,5 +12,6 @@ export class AnalysisEventDto {
     readonly keepPolling: boolean,
     readonly pollingExpired: boolean,
     readonly result: AnalysisResultDto | undefined,
+    readonly isReportExportable: boolean,
   ) {}
 }
