@@ -14,6 +14,11 @@ const completedAnalysisEvent = () => createAnalysisEvent({
   result: createAnalysisResult({ createdAt: new Date('2026-10-28T01:15:00Z') }),
 })
 
+const recheckApiKeyAccess = async (stack: Awaited<ReturnType<typeof mountAnalysisRoutes>>['stack']): Promise<void> => {
+  stack.apiKeyAccessState.apiKeyAccess.value = await stack.apiKeyApplication.getApiKeyAccess()
+  await flushPromises()
+}
+
 describe('analysis report page', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] })
@@ -72,6 +77,23 @@ describe('analysis report page', () => {
     expect(paper.text()).not.toContain('匯出 PDF')
     expect(wrapper.find('.report-layout__toolbar').text()).toContain('返回分析事件')
     expect(wrapper.find('.report-layout__toolbar').text()).toContain('匯出 PDF')
+  })
+
+  it('does not open the save dialog again when the report reappears after an API key recheck', async () => {
+    const { stack, router, wrapper } = await mountAnalysisRoutes('/analysis-events')
+    stack.analysisEventProxy.getAnalysisEvent.mockResolvedValue(completedAnalysisEvent())
+    await router.push('/analysis-events/42/report')
+    await flushPromises()
+
+    stack.apiKeyProxy.getApiKeyStatus.mockResolvedValueOnce(new ApiKeyStatus('我的研究', 'inactive'))
+    await recheckApiKeyAccess(stack)
+    expect(wrapper.text()).not.toContain('標的分析報告')
+    expect(wrapper.findAll('button').map(button => button.text())).not.toContain('匯出 PDF')
+    await wrapper.findAll('button').find(button => button.text() === '重新檢查')?.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('標的分析報告')
+    expect(stack.documentPrintProxy.printDocument).toHaveBeenCalledTimes(1)
   })
 
   it('opens the save dialog again from the toolbar and leads back to the analysis event', async () => {

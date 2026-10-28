@@ -8,6 +8,7 @@ import AnalysisReportDocument from '~/components/organisms/AnalysisReportDocumen
 import ApiKeyGate from '~/components/organisms/ApiKeyGate.vue'
 import ReportLayout from '~/components/templates/ReportLayout.vue'
 import { ANALYSIS_REPORT_APPLICATION } from '~/composables/application-injection-keys'
+import { useApiKeyAccess } from '~/composables/use-api-key-access'
 import { useApplication } from '~/composables/use-application'
 import { useRequest } from '~/composables/use-request'
 import type { AnalysisReportDto } from '~/domain/models/dto/analysis-report-dto'
@@ -18,7 +19,15 @@ const route = useRoute()
 const analysisEventId = Number(route.params.analysisEventId)
 const analysisReportApplication = useApplication(ANALYSIS_REPORT_APPLICATION)
 const analysisReport = useRequest(() => analysisReportApplication.getAnalysisReport(analysisEventId))
+const { apiKeyAccess } = useApiKeyAccess()
 const printAnalysisReport = (report: AnalysisReportDto): void => analysisReportApplication.printAnalysisReport(report)
+let isPrintedOnArrival = false
+const printOnArrival = (report: AnalysisReportDto): void => {
+  if (!isPrintedOnArrival) {
+    isPrintedOnArrival = true
+    printAnalysisReport(report)
+  }
+}
 
 onMounted(() => analysisReport.run())
 </script>
@@ -30,7 +39,7 @@ onMounted(() => analysisReport.run())
         返回分析事件
       </NuxtLink>
       <AppButton
-        v-if="analysisReport.data.value"
+        v-if="analysisReport.data.value && apiKeyAccess?.isUsable"
         @click="printAnalysisReport(analysisReport.data.value)"
       >
         匯出 PDF
@@ -46,7 +55,7 @@ onMounted(() => analysisReport.run())
       <AnalysisReportDocument
         v-else
         :report="analysisReport.data.value"
-        @vue:mounted="printAnalysisReport(analysisReport.data.value)"
+        @vue:mounted="printOnArrival(analysisReport.data.value)"
       />
     </ApiKeyGate>
   </ReportLayout>

@@ -14,14 +14,16 @@ export const createApplicationStack = (storedApiKey?: string) => {
   const analysisEventProxy = mockAnalysisEventProxy()
   const documentPrintProxy = mockDocumentPrintProxy()
   const apiKeyService = new ApiKeyService(apiKeyProxy, mockApiKeyStorageProxy(storedApiKey))
+  const apiKeyAccessState = new ApiKeyAccessState()
+  const apiKeyApplication = new ApiKeyApplication(apiKeyService)
   const provide = {
-    [API_KEY_ACCESS_STATE]: new ApiKeyAccessState(),
-    [API_KEY_APPLICATION]: new ApiKeyApplication(apiKeyService),
+    [API_KEY_ACCESS_STATE]: apiKeyAccessState,
+    [API_KEY_APPLICATION]: apiKeyApplication,
     [SYMBOL_ANALYSIS_APPLICATION]: new SymbolAnalysisApplication(
       new SymbolAnalysisService(analysisEventProxy, mockRecentAnalysisStorageProxy(), apiKeyService),
       new MarketCategoryService(),
     ),
     [ANALYSIS_REPORT_APPLICATION]: new AnalysisReportApplication(new AnalysisReportService(analysisEventProxy, documentPrintProxy, apiKeyService)),
   }
-  return { apiKeyProxy, analysisEventProxy, documentPrintProxy, provide }
+  return { apiKeyProxy, analysisEventProxy, documentPrintProxy, apiKeyAccessState, apiKeyApplication, provide }
 }
