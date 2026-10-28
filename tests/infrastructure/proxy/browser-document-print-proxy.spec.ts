@@ -42,4 +42,16 @@ describe('BrowserDocumentPrintProxy', () => {
 
     expect(document.title).toBe('分析事件')
   })
+
+  it('keeps the original title when printing again before the previous print is over', () => {
+    document.title = '標的資訊面分析操作台'
+    vi.spyOn(window, 'print').mockImplementation(() => undefined)
+    const proxy = new BrowserDocumentPrintProxy()
+
+    proxy.printDocument('台股-2330-分析-2026-10-28')
+    proxy.printDocument('台股-2330-分析-2026-10-28')
+    window.dispatchEvent(new Event('afterprint'))
+
+    expect(document.title).toBe('標的資訊面分析操作台')
+  })
 })
