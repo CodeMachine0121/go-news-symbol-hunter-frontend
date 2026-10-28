@@ -42,8 +42,11 @@ defineProps<{
 
   &__header {
     display: flex;
-    break-after: avoid;
     flex-direction: column;
+
+    @include on-print {
+      break-after: avoid;
+    }
   }
 
   &__title {
