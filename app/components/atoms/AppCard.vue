@@ -35,6 +35,8 @@ defineProps<{
   padding: spacing('lg');
 
   @include on-print {
+    padding: 0;
+    border: none;
     box-shadow: none;
   }
 
