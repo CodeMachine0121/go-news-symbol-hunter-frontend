@@ -10,6 +10,14 @@ const mountPanel = (status: string, minutesAfterStart: number) => mount(Analysis
 })
 
 describe('AnalysisEventStatusPanel', () => {
+  it('shows the symbol with its name', () => {
+    const wrapper = mount(AnalysisEventStatusPanel, {
+      props: { analysisEvent: createAnalysisEvent({ symbol: '2330', symbolName: '台積電', category: 'twStock' }).toDomain().toDto(STARTED_AT) },
+    })
+
+    expect(wrapper.text()).toContain('台股 2330 台積電')
+  })
+
   it('shows 分析中 while waiting', () => {
     const wrapper = mountPanel('running', 1)
 

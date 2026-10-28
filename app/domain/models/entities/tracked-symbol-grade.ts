@@ -4,6 +4,7 @@ import { TrackedSymbolGradeDomain } from '~/domain/models/domains/tracked-symbol
 export class TrackedSymbolGrade {
   constructor(
     readonly symbol: string,
+    readonly symbolName: string,
     readonly category: string,
     readonly tradingDay: string,
     readonly grade: string,

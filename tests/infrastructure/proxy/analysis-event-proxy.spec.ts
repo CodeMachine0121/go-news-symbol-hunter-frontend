@@ -43,6 +43,16 @@ describe('AnalysisEventProxy', () => {
     expect(requestOf(fetchStub)).toMatchObject({ url: 'http://backend.test/analysis-events', method: 'POST', apiKey: 'key', body: '{"symbol":"BTC","category":"crypto"}' })
   })
 
+  it.each([
+    { case: 'with a name', wire: { ...runningEventWire, symbolName: 'Bitcoin' }, symbolName: 'Bitcoin' },
+    { case: 'with an empty name', wire: { ...runningEventWire, symbolName: '' }, symbolName: '' },
+    { case: 'from a backend that sends no name', wire: runningEventWire, symbolName: '' },
+  ])('reads the symbol name $case', async ({ wire, symbolName }) => {
+    stubFetch(jsonResponse(200, wire))
+
+    expect((await createProxy().getAnalysisEvent(9, 'key')).symbolName).toBe(symbolName)
+  })
+
   it('reads a completed analysis without losing price precision', async () => {
     const fetchStub = stubFetch(jsonResponse(200, succeededEventWire({ price: '0.00001234', currency: 'USDT', pricedAt: '2026-10-16T02:01:00Z', source: 'Binance' })))
 

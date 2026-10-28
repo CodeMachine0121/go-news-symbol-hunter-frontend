@@ -9,9 +9,21 @@ describe('LocalStorageRecentAnalysisStorageProxy', () => {
 
   it('remembers recent analyses across reads', () => {
     const storage = new LocalStorageRecentAnalysisStorageProxy()
-    storage.save([new RecentAnalysis(3, 'BTC', 'crypto', new Date('2026-10-16T02:00:00Z'))])
+    storage.save([new RecentAnalysis(3, 'BTC', 'Bitcoin', 'crypto', new Date('2026-10-16T02:00:00Z'))])
 
-    expect(new LocalStorageRecentAnalysisStorageProxy().read()).toEqual([new RecentAnalysis(3, 'BTC', 'crypto', new Date('2026-10-16T02:00:00Z'))])
+    expect(new LocalStorageRecentAnalysisStorageProxy().read()).toEqual([new RecentAnalysis(3, 'BTC', 'Bitcoin', 'crypto', new Date('2026-10-16T02:00:00Z'))])
+  })
+
+  it('reads analyses remembered before symbol names existed with an empty name', () => {
+    localStorage.setItem('go-symbol-news-hunter.recent-analyses', JSON.stringify([{ analysisEventId: 3, symbol: '2330', category: 'twStock', startedAt: '2026-10-16T02:00:00.000Z' }]))
+
+    expect(new LocalStorageRecentAnalysisStorageProxy().read()).toEqual([new RecentAnalysis(3, '2330', '', 'twStock', new Date('2026-10-16T02:00:00Z'))])
+  })
+
+  it('reads a stored name that is not text as an empty name', () => {
+    localStorage.setItem('go-symbol-news-hunter.recent-analyses', JSON.stringify([{ analysisEventId: 3, symbol: '2330', symbolName: 123, category: 'twStock', startedAt: '2026-10-16T02:00:00.000Z' }]))
+
+    expect(new LocalStorageRecentAnalysisStorageProxy().read()).toEqual([new RecentAnalysis(3, '2330', '', 'twStock', new Date('2026-10-16T02:00:00Z'))])
   })
 
   it.each([

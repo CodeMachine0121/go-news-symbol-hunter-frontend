@@ -36,6 +36,7 @@ export const createAnalysisResult = (overrides: {
 export const createAnalysisEvent = (overrides: {
   analysisEventId?: number
   symbol?: string
+  symbolName?: string
   category?: string
   status?: string
   failureReason?: string
@@ -45,6 +46,7 @@ export const createAnalysisEvent = (overrides: {
   new AnalysisEvent(
     overrides.analysisEventId ?? 1,
     overrides.symbol ?? 'BTC',
+    overrides.symbolName ?? '',
     overrides.category ?? 'crypto',
     overrides.status ?? 'running',
     overrides.failureReason,
@@ -56,5 +58,5 @@ export const createAnalysisEvent = (overrides: {
 export const createSessionGrade = (session: string): SessionGrade =>
   new SessionGrade(session, 'bullish', 70, `${session} 理由`, [new KeyEvent(`${session} 事件`, `https://news.example/${session}`, new Date('2026-10-16T00:00:00Z'))], ['風險'], [], new Date('2026-10-16T01:00:00Z'))
 
-export const createTrackedSymbolGrade = (sessions: string[] = ['preMarket', 'intraday']): TrackedSymbolGrade =>
-  new TrackedSymbolGrade('2330', 'twStock', '2026-10-16', 'bullish', 0.85, 70, new Date('2026-10-16T05:00:00Z'), sessions.map(createSessionGrade))
+export const createTrackedSymbolGrade = (sessions: string[] = ['preMarket', 'intraday'], symbolName = ''): TrackedSymbolGrade =>
+  new TrackedSymbolGrade('2330', symbolName, 'twStock', '2026-10-16', 'bullish', 0.85, 70, new Date('2026-10-16T05:00:00Z'), sessions.map(createSessionGrade))

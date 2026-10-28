@@ -5,6 +5,7 @@ import { LabelledValueDto } from '~/domain/models/dto/labelled-value-dto'
 import type { AnalysisEvent } from '~/domain/models/entities/analysis-event'
 import type { AnalysisResult } from '~/domain/models/entities/analysis-result'
 import { MarketCategoryDomain } from '~/domain/models/domains/market-category-domain'
+import { SymbolLabelDomain } from '~/domain/models/domains/symbol-label-domain'
 import { TimestampDomain } from '~/domain/models/domains/timestamp-domain'
 
 export const POLLING_LIMIT_MILLISECONDS = 15 * 60 * 1000
@@ -31,6 +32,7 @@ export class AnalysisEventDomain {
     return new AnalysisEventDto(
       this.analysisEvent.analysisEventId,
       this.analysisEvent.symbol,
+      this.symbolLabel.toText(),
       new MarketCategoryDomain(this.analysisEvent.category).toDto(),
       status,
       failureMessage,
@@ -51,12 +53,17 @@ export class AnalysisEventDomain {
     return new AnalysisReportDto(
       this.analysisEvent.analysisEventId,
       this.analysisEvent.symbol,
+      this.symbolLabel.toText(),
       category,
-      `${category.label}-${this.analysisEvent.symbol}-分析-${new TimestampDomain(result.createdAt).toDateText()}`,
+      [category.label, ...this.symbolLabel.toFileNameParts(), '分析', new TimestampDomain(result.createdAt).toDateText()].join('-'),
       new TimestampDomain(exportedAt).toDateTimeText(),
       INVESTMENT_DISCLAIMER,
       result.toDto(),
     )
+  }
+
+  private get symbolLabel(): SymbolLabelDomain {
+    return new SymbolLabelDomain(this.analysisEvent.symbol, this.analysisEvent.symbolName)
   }
 
   private get exportableResult(): AnalysisResult | undefined {

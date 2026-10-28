@@ -4,6 +4,7 @@ import { TrackedSymbolGradeDto } from '~/domain/models/dto/tracked-symbol-grade-
 import type { TrackedSymbolGrade } from '~/domain/models/entities/tracked-symbol-grade'
 import { GradeDomain } from '~/domain/models/domains/grade-domain'
 import { MarketCategoryDomain } from '~/domain/models/domains/market-category-domain'
+import { SymbolLabelDomain } from '~/domain/models/domains/symbol-label-domain'
 import { TimestampDomain } from '~/domain/models/domains/timestamp-domain'
 import { TRADING_SESSIONS, TradingSessionDomain } from '~/domain/models/domains/trading-session-domain'
 
@@ -30,6 +31,7 @@ export class TrackedSymbolGradeDomain {
     })
     return new TrackedSymbolGradeDto(
       this.trackedSymbolGrade.symbol,
+      new SymbolLabelDomain(this.trackedSymbolGrade.symbol, this.trackedSymbolGrade.symbolName).toText(),
       new MarketCategoryDomain(this.trackedSymbolGrade.category).toDto(),
       this.trackedSymbolGrade.tradingDay,
       new GradeDomain(this.trackedSymbolGrade.grade).toDto(),

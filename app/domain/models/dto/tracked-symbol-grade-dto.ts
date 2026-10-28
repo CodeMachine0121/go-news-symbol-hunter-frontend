@@ -4,6 +4,7 @@ import type { SessionSlotDto } from '~/domain/models/dto/session-slot-dto'
 export class TrackedSymbolGradeDto {
   constructor(
     readonly symbol: string,
+    readonly symbolLabel: string,
     readonly category: LabelledValueDto,
     readonly tradingDay: string,
     readonly grade: LabelledValueDto,

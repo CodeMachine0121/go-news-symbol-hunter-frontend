@@ -5,6 +5,7 @@ export class AnalysisEvent {
   constructor(
     readonly analysisEventId: number,
     readonly symbol: string,
+    readonly symbolName: string,
     readonly category: string,
     readonly status: string,
     readonly failureReason: string | undefined,

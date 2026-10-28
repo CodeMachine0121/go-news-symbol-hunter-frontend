@@ -11,6 +11,8 @@ import type { BackendHttpProxy } from '~/infrastructure/proxy/backend-http-proxy
 type AnalysisEventWire = {
   analysisEventId: number
   symbol: string
+  // older backends do not send it
+  symbolName?: string
   category: string
   status: string
   failureReason?: string
@@ -53,6 +55,7 @@ export class AnalysisEventProxy implements IAnalysisEventProxy {
     return new AnalysisEvent(
       analysisEvent.analysisEventId,
       analysisEvent.symbol,
+      analysisEvent.symbolName ?? '',
       analysisEvent.category,
       analysisEvent.status,
       analysisEvent.failureReason,

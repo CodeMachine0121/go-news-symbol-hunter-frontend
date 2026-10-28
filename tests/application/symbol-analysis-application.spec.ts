@@ -63,6 +63,18 @@ describe('SymbolAnalysisApplication', () => {
     expect(symbolAnalysisApplication.getRecentAnalyses().map(recentAnalysis => recentAnalysis.analysisEventId)).toEqual([2, 3, 1])
   })
 
+  it.each([
+    { case: 'with the name the backend answered', symbolName: '台積電', symbolLabel: '2330 台積電' },
+    { case: 'without a name', symbolName: '', symbolLabel: '2330' },
+  ])('remembers a started analysis $case', async ({ symbolName, symbolLabel }) => {
+    const { analysisEventProxy, symbolAnalysisApplication } = createApplication()
+    analysisEventProxy.startSymbolAnalysis.mockResolvedValueOnce(new StartedSymbolAnalysis(true, createAnalysisEvent({ analysisEventId: 1, symbol: '2330', symbolName, category: 'twStock' })))
+
+    await symbolAnalysisApplication.startSymbolAnalysis(new SymbolQueryDto('2330', 'twStock'))
+
+    expect(symbolAnalysisApplication.getRecentAnalyses()[0]).toMatchObject({ symbol: '2330', symbolLabel, category: { label: '台股' } })
+  })
+
   it('passes on the capacity limit and remembers nothing', async () => {
     const { analysisEventProxy, recentAnalysisStorageProxy, symbolAnalysisApplication } = createApplication()
     analysisEventProxy.startSymbolAnalysis.mockRejectedValue(new BackendRejectionError('analysis_capacity_reached', '目前分析數量已達上限，請稍後再試'))

@@ -3,7 +3,7 @@ import { RecentAnalysisListDomain } from '~/domain/models/domains/recent-analysi
 import { RecentAnalysis } from '~/domain/models/entities/recent-analysis'
 
 const createRecentAnalysis = (analysisEventId: number): RecentAnalysis =>
-  new RecentAnalysis(analysisEventId, 'BTC', 'crypto', new Date('2026-10-16T02:00:00Z'))
+  new RecentAnalysis(analysisEventId, 'BTC', '', 'crypto', new Date('2026-10-16T02:00:00Z'))
 
 const rememberAll = (analysisEventIds: number[]): RecentAnalysisListDomain =>
   analysisEventIds.reduce((list, analysisEventId) => list.remember(createRecentAnalysis(analysisEventId)), new RecentAnalysisListDomain([]))

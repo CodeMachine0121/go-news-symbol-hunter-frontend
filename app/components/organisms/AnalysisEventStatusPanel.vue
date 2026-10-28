@@ -18,7 +18,7 @@ defineEmits<{ refresh: [], restart: [] }>()
     <dl class="analysis-event-status-panel">
       <div class="analysis-event-status-panel__row">
         <dt>標的</dt>
-        <dd>{{ analysisEvent.category.label }} {{ analysisEvent.symbol }}</dd>
+        <dd>{{ analysisEvent.category.label }} {{ analysisEvent.symbolLabel }}</dd>
       </div>
       <div class="analysis-event-status-panel__row">
         <dt>狀態</dt>

@@ -5,6 +5,7 @@ export class AnalysisReportDto {
   constructor(
     readonly analysisEventId: number,
     readonly symbol: string,
+    readonly symbolLabel: string,
     readonly category: LabelledValueDto,
     readonly fileName: string,
     readonly exportedAtText: string,

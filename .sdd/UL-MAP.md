@@ -21,7 +21,8 @@
 | 服務連線狀態 | `BackendHealth` | 服務狀態 | 操作台目前是否連得上服務 | Confirmed |
 | 自動更新 | `AnalysisPolling` | — | 分析中時定期重新查詢分析事件，直到完成、失敗或達到等候上限 | Confirmed |
 | 分析報告 | `AnalysisReport` | 標的分析報告 | 一筆已完成分析事件的分析結果，依紙本版面排成的報告：頁首、分析結論、關鍵事件、風險因子、分析佐證、頁尾；每份有自己的網址 | Confirmed |
-| 報告檔名 | `AnalysisReportFileName` | — | 匯出 PDF 的預設檔名：「市場類別-標的-分析-分析完成日期」，日期以台灣時間計 | Confirmed |
+| 報告檔名 | `AnalysisReportFileName` | — | 匯出 PDF 的預設檔名：「市場類別-標的-分析-分析完成日期」，日期以台灣時間計；有標的名稱時為「市場類別-標的-標的名稱-分析-分析完成日期」 | Confirmed |
+| 標的顯示文字 | `SymbolLabel` | — | 操作台顯示標的的寫法：標的名稱（後端詞彙 `symbolName`）去除前後空白後不為空時為「代號 名稱」（如「2330 台積電」），否則只有「代號」 | Confirmed |
 | 匯出時間 | `ExportedAt` | 匯出時間 | 打開分析報告當下的台灣時間，精確到分鐘，印在報告頁尾 | Confirmed |
 | 投資聲明 | `InvestmentDisclaimer` | — | 報告頁尾固定文字「本報告僅供資訊參考，不構成任何投資建議」 | Confirmed |
 
