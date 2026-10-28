@@ -1,4 +1,5 @@
 import type { InjectionKey } from 'vue'
+import type { AnalysisReportApplication } from '~/application/analysis-report-application'
 import type { ApiKeyAccessState } from '~/composables/api-key-access-state'
 import type { ApiKeyApplication } from '~/application/api-key-application'
 import type { BackendHealthApplication } from '~/application/backend-health-application'
@@ -10,6 +11,7 @@ import type { TrackedSymbolGradeApplication } from '~/application/tracked-symbol
 export const API_KEY_APPLICATION: InjectionKey<ApiKeyApplication> = Symbol('ApiKeyApplication')
 export const NEWS_SEARCH_APPLICATION: InjectionKey<NewsSearchApplication> = Symbol('NewsSearchApplication')
 export const SYMBOL_ANALYSIS_APPLICATION: InjectionKey<SymbolAnalysisApplication> = Symbol('SymbolAnalysisApplication')
+export const ANALYSIS_REPORT_APPLICATION: InjectionKey<AnalysisReportApplication> = Symbol('AnalysisReportApplication')
 export const TRACKED_SYMBOL_GRADE_APPLICATION: InjectionKey<TrackedSymbolGradeApplication> = Symbol('TrackedSymbolGradeApplication')
 export const GRADE_BACKTEST_APPLICATION: InjectionKey<GradeBacktestApplication> = Symbol('GradeBacktestApplication')
 export const BACKEND_HEALTH_APPLICATION: InjectionKey<BackendHealthApplication> = Symbol('BackendHealthApplication')
