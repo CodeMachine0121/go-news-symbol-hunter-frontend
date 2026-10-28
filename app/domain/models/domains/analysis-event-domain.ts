@@ -1,11 +1,10 @@
+import { AnalysisReportUnavailableError } from '~/domain/errors/analysis-report-unavailable-error'
 import { AnalysisEventDto } from '~/domain/models/dto/analysis-event-dto'
-import { AnalysisResultDto } from '~/domain/models/dto/analysis-result-dto'
+import { AnalysisReportDto } from '~/domain/models/dto/analysis-report-dto'
 import { LabelledValueDto } from '~/domain/models/dto/labelled-value-dto'
-import { PriceAtAnalysisDto } from '~/domain/models/dto/price-at-analysis-dto'
 import type { AnalysisEvent } from '~/domain/models/entities/analysis-event'
-import { GradeDomain } from '~/domain/models/domains/grade-domain'
+import type { AnalysisResult } from '~/domain/models/entities/analysis-result'
 import { MarketCategoryDomain } from '~/domain/models/domains/market-category-domain'
-import { TimeHorizonDomain } from '~/domain/models/domains/time-horizon-domain'
 import { TimestampDomain } from '~/domain/models/domains/timestamp-domain'
 
 export const POLLING_LIMIT_MILLISECONDS = 15 * 60 * 1000
@@ -16,7 +15,7 @@ const STATUSES: Record<string, LabelledValueDto> = {
   failed: new LabelledValueDto('failed', '失敗', 'negative'),
 }
 
-const PRICE_NOT_OBTAINED = '未取得'
+const INVESTMENT_DISCLAIMER = '本報告僅供資訊參考，不構成任何投資建議'
 
 export class AnalysisEventDomain {
   constructor(private readonly analysisEvent: AnalysisEvent) {}
@@ -28,24 +27,7 @@ export class AnalysisEventDomain {
     const failureMessage = status.value === 'failed'
       ? `分析失敗：${this.analysisEvent.failureReason ?? '未知原因'}`
       : undefined
-    const result = this.analysisEvent.result
-    const price = result?.priceAtAnalysis
-    const priceAtAnalysis = price
-      ? new PriceAtAnalysisDto(`${price.price.toFixed()} ${price.currency}`, price.source, new TimestampDomain(price.pricedAt).toDateTimeText())
-      : new PriceAtAnalysisDto(PRICE_NOT_OBTAINED, PRICE_NOT_OBTAINED, PRICE_NOT_OBTAINED)
-    const resultDto = status.value === 'succeeded' && result
-      ? new AnalysisResultDto(
-          new GradeDomain(result.grade).toDto(),
-          result.confidence,
-          new TimeHorizonDomain(result.timeHorizon).toDto(),
-          result.reason,
-          result.keyEvents.map(keyEvent => keyEvent.toDto()),
-          result.riskFactors,
-          result.evidence.map(evidence => evidence.toDto()),
-          priceAtAnalysis,
-          new TimestampDomain(result.createdAt).toDateTimeText(),
-        )
-      : undefined
+    const resultDto = this.exportableResult?.toDto()
     return new AnalysisEventDto(
       this.analysisEvent.analysisEventId,
       this.analysisEvent.symbol,
@@ -56,6 +38,28 @@ export class AnalysisEventDomain {
       isRunning && !isOverdue,
       isRunning && isOverdue,
       resultDto,
+      resultDto !== undefined,
     )
+  }
+
+  toReportDto(exportedAt: Date): AnalysisReportDto {
+    const result = this.exportableResult
+    if (result === undefined) {
+      throw new AnalysisReportUnavailableError()
+    }
+    const category = new MarketCategoryDomain(this.analysisEvent.category).toDto()
+    return new AnalysisReportDto(
+      this.analysisEvent.analysisEventId,
+      this.analysisEvent.symbol,
+      category,
+      `${category.label}-${this.analysisEvent.symbol}-分析-${new TimestampDomain(result.createdAt).toDateText()}`,
+      new TimestampDomain(exportedAt).toDateTimeText(),
+      INVESTMENT_DISCLAIMER,
+      result.toDto(),
+    )
+  }
+
+  private get exportableResult(): AnalysisResult | undefined {
+    return this.analysisEvent.status === 'succeeded' ? this.analysisEvent.result : undefined
   }
 }

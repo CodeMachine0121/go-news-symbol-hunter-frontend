@@ -37,6 +37,14 @@ onMounted(() => load())
       :description="`分析事件 #${analysisEventId}`"
     >
       <template #actions>
+        <NuxtLink
+          v-if="analysisEvent?.isReportExportable"
+          :to="`/analysis-events/${analysisEventId}/report`"
+          target="_blank"
+          rel="noopener"
+        >
+          匯出 PDF
+        </NuxtLink>
         <NuxtLink to="/analysis-events">
           返回標的分析
         </NuxtLink>

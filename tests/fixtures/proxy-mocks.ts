@@ -2,6 +2,7 @@ import { vi } from 'vitest'
 import type { IAnalysisEventProxy } from '~/domain/interface/i-analysis-event-proxy'
 import type { IApiKeyProxy } from '~/domain/interface/i-api-key-proxy'
 import type { IApiKeyStorageProxy } from '~/domain/interface/i-api-key-storage-proxy'
+import type { IDocumentPrintProxy } from '~/domain/interface/i-document-print-proxy'
 import type { IBackendHealthProxy } from '~/domain/interface/i-backend-health-proxy'
 import type { IGradeBacktestProxy } from '~/domain/interface/i-grade-backtest-proxy'
 import type { INewsProxy } from '~/domain/interface/i-news-proxy'
@@ -58,3 +59,7 @@ export const mockGradeBacktestProxy = () => ({
 export const mockBackendHealthProxy = () => ({
   checkHealth: vi.fn<IBackendHealthProxy['checkHealth']>(),
 }) satisfies IBackendHealthProxy
+
+export const mockDocumentPrintProxy = () => ({
+  printDocument: vi.fn<IDocumentPrintProxy['printDocument']>(),
+}) satisfies IDocumentPrintProxy
