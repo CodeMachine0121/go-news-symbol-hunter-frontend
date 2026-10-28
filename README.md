@@ -59,7 +59,7 @@ Clean / Onion Architecture，依賴一律指向 Domain：
 | POST | `/analysis-events` | 已啟用 | 發起分析（body `{ symbol, category }`）。**非同步**：新建時回 202；6 小時內有可重用的分析就直接回那一筆 | symbol-news-analysis |
 | GET | `/analysis-events/:analysisEventId` | 已啟用 | 查詢分析事件狀態（`running` / `succeeded` / `failed`）、失敗原因、分析結果 | symbol-news-analysis、analysis-price-snapshot |
 | GET | `/tracked-symbol-grades?symbol=&category=` | 已啟用 | 追蹤標的最新一天的綜合評等與各時段評等（標的與市場類別要一起給，或都不給） | tracked-symbol-session-grade |
-| GET | `/grade-backtest?completedFrom=&completedTo=&symbol=&category=` | 已啟用 | 評等回測：命中率總表（整體、依市場類別、評等、信心分組）與逐筆明細。超過 500 筆會被拒絕 | analysis-grade-backtest |
+| GET | `/grade-backtest?completedFrom=&completedTo=&symbol=&category=&source=` | 已啟用 | 評等回測：手動分析與追蹤標的綜合評等（評等來源 `manual` / `background`）的命中率總表（整體、依市場類別、評等、信心分組、來源）與逐筆明細。超過 500 筆會被拒絕 | analysis-grade-backtest、unified-grade-record |
 
 錯誤回應一律是 `{ "error": { "code", "message" } }`。Proxy 要把它包成領域可辨識的具名錯誤，讓元件依錯誤種類顯示對應畫面。
 
@@ -92,7 +92,7 @@ Clean / Onion Architecture，依賴一律指向 Domain：
 | 標的分析 | `/analysis-events` | 發起後輪詢到 `succeeded` / `failed`；顯示評等、信心、理由、關鍵事件（附來源連結）、風險因子、分析時價格 |
 | 分析報告（匯出 PDF） | `/analysis-events/:analysisEventId` | 只有已完成的分析可匯出；新分頁打開 A4 紙本版面並開啟瀏覽器存檔視窗，預設檔名「市場類別-標的-標的名稱-分析-完成日期」（沒有標的名稱時省略該段；標的名稱去掉 `.` 與不能出現在檔名的字元） |
 | 追蹤標的評等 | `/tracked-symbol-grades` | 綜合評等 + 盤前 / 盤中 / 盤後時段評等 |
-| 評等回測 | `/grade-backtest` | 命中率總表（並列隨機 50% 作比較）+ 逐筆明細 |
+| 評等回測 | `/grade-backtest` | 可依評等來源篩選；命中率總表（並列隨機 50% 作比較，含依來源）+ 逐筆明細（標出來源，背景紀錄附交易日） |
 
 前端的功能切片在本 repo 的 `.sdd/{YYYY-MM-DD}-{feature-slug}/` 規劃。
 
