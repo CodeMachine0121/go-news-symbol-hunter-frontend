@@ -34,7 +34,7 @@
 
 | Name | Kind | Responsibility (purpose) | Collaborators | Satisfies (PRD scenario) |
 | :--- | :--- | :--- | :--- | :--- |
-| `SymbolLabelDomain` | Domain Model | 建構子收 `(symbol, symbolName)`，名稱去前後空白；`toText()` → 「代號 名稱」或「代號」；`toFileNameParts()` → `[代號, 名稱]` 或 `[代號]` | 被 `AnalysisEventDomain`、`TrackedSymbolGradeDomain`、`RecentAnalysis` 使用 | US-01 全部、US-03 全部 |
+| `SymbolLabelDomain` | Domain Model | 建構子收 `(symbol, symbolName)`，名稱去前後空白；`toText()` → 「代號 名稱」或「代號」（名稱原樣）；`toFileNameParts()` → `[代號, 名稱]` 或 `[代號]`，名稱去掉 `.` 與檔名不能有的字元（`\ / : * ? " < > |`），去完是空的就只留代號；兩者各自從欄位組，互不依賴 | 被 `AnalysisEventDomain`、`TrackedSymbolGradeDomain`、`RecentAnalysis` 使用 | US-01 全部、US-03 全部 |
 
 ---
 
@@ -95,5 +95,5 @@ flowchart TD
 
 ## 8. Risks & Open Decisions
 
-- **Risks / trade-offs:** 檔名帶進名稱；名稱來自交易所 / 報價來源，不含檔名非法字元的機率高，不另做清洗。
+- **Risks / trade-offs:** 檔名帶進名稱。美股名稱常有 `.`（「Apple Inc.」），瀏覽器可能把 `.` 之後當副檔名而截斷建議檔名，所以檔名片段會清掉 `.` 與檔名非法字元；畫面文字不受影響（code review 後修正）。
 - **Open decisions:** 無。

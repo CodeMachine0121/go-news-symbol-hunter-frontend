@@ -11,6 +11,8 @@ describe('TrackedSymbolGradeTable', () => {
     const wrapper = mount(TrackedSymbolGradeTable, { props: { trackedSymbolGrades: [createTrackedSymbolGrade(['preMarket'], symbolName).toDomain().toDto()] } })
 
     expect(wrapper.find('strong').text()).toBe(symbolLabel)
+    // a long name is cut off on screen, so the full label stays reachable on hover
+    expect(wrapper.find('strong').attributes('title')).toBe(symbolLabel)
   })
 
   it('lists the combined grade of each tracked symbol', () => {

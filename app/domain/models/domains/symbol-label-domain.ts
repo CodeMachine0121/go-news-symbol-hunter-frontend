@@ -6,10 +6,12 @@ export class SymbolLabelDomain {
   }
 
   toText(): string {
-    return this.toFileNameParts().join(' ')
+    return this.symbolName === '' ? this.symbol : `${this.symbol} ${this.symbolName}`
   }
 
   toFileNameParts(): string[] {
-    return this.symbolName === '' ? [this.symbol] : [this.symbol, this.symbolName]
+    // a browser reads a period as the start of an extension and rewrites path characters, so the file name keeps neither
+    const fileNameSymbolName = this.symbolName.replace(/[.\\/:*?"<>|]/g, '').trim()
+    return fileNameSymbolName === '' ? [this.symbol] : [this.symbol, fileNameSymbolName]
   }
 }

@@ -43,6 +43,7 @@ defineProps<{
 
   &__link {
     display: flex;
+    gap: spacing('md');
     justify-content: space-between;
     padding: spacing('sm') 0;
     border-bottom: 1px solid color('border');
@@ -54,10 +55,13 @@ defineProps<{
   }
 
   &__symbol {
+    min-width: 0;
     font-weight: font-weight('medium');
+    overflow-wrap: anywhere;
   }
 
   &__time {
+    flex-shrink: 0;
     color: color('text-muted');
     font-size: font-size('sm');
   }

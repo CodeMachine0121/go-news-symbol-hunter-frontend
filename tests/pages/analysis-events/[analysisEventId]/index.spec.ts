@@ -48,6 +48,19 @@ describe('analysis event page', () => {
     expect(wrapper.text()).toContain('目前分析數量已達上限，請稍後再試')
   })
 
+  it.each([
+    { case: 'with its name', symbolName: '台積電', title: '台股 2330 台積電 分析' },
+    { case: 'without a name', symbolName: '', title: '台股 2330 分析' },
+  ])('titles the page with the symbol $case', async ({ symbolName, title }) => {
+    const { stack, router, wrapper } = await mountAnalysisRoutes('/analysis-events')
+    stack.analysisEventProxy.getAnalysisEvent.mockResolvedValue(createAnalysisEvent({ analysisEventId: 5, symbol: '2330', symbolName, category: 'twStock', status: 'failed', failureReason: 'AI 服務暫時無法使用' }))
+
+    await router.push('/analysis-events/5')
+    await flushPromises()
+
+    expect(wrapper.find('h1').text()).toBe(title)
+  })
+
   it('says the analysis event does not exist', async () => {
     const { stack, router, wrapper } = await mountAnalysisRoutes('/analysis-events')
     stack.analysisEventProxy.getAnalysisEvent.mockRejectedValue(new BackendRejectionError('analysis_event_not_found', '找不到此分析事件'))

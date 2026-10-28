@@ -18,7 +18,10 @@ const isExpanded = ref(false)
   <AppCard>
     <div class="tracked-symbol-grade-card__summary">
       <div class="tracked-symbol-grade-card__identity">
-        <strong class="tracked-symbol-grade-card__symbol">{{ trackedSymbolGrade.symbolLabel }}</strong>
+        <strong
+          class="tracked-symbol-grade-card__symbol"
+          :title="trackedSymbolGrade.symbolLabel"
+        >{{ trackedSymbolGrade.symbolLabel }}</strong>
         <span class="tracked-symbol-grade-card__muted">{{ trackedSymbolGrade.category.label }}・交易日 {{ trackedSymbolGrade.tradingDay }}</span>
       </div>
       <dl class="tracked-symbol-grade-card__figures">
@@ -95,10 +98,15 @@ const isExpanded = ref(false)
   &__identity {
     display: flex;
     flex-direction: column;
+    min-width: 0;
   }
 
+  // a long company name stays on one line so the card keeps its height; the full label is in the title
   &__symbol {
+    overflow: hidden;
     font-size: font-size('xl');
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__muted {

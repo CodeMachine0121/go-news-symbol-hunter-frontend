@@ -33,7 +33,7 @@ onMounted(() => load())
 <template>
   <ConsolePageLayout>
     <AppPageHeader
-      :title="analysisEvent ? `${analysisEvent.category.label} ${analysisEvent.symbol} 分析` : '分析事件'"
+      :title="analysisEvent ? `${analysisEvent.category.label} ${analysisEvent.symbolLabel} 分析` : '分析事件'"
       :description="`分析事件 #${analysisEventId}`"
     >
       <template #actions>

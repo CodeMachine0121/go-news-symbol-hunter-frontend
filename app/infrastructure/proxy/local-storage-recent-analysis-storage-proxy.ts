@@ -7,7 +7,7 @@ type RecentAnalysisWire = {
   analysisEventId: number
   symbol: string
   // analyses remembered before symbol names existed have none
-  symbolName?: string
+  symbolName?: unknown
   category: string
   startedAt: string
 }
@@ -19,7 +19,8 @@ export class LocalStorageRecentAnalysisStorageProxy implements IRecentAnalysisSt
       return recentAnalyses.map(recentAnalysis => new RecentAnalysis(
         recentAnalysis.analysisEventId,
         recentAnalysis.symbol,
-        recentAnalysis.symbolName ?? '',
+        // hand-edited or older browser data may hold anything here
+        typeof recentAnalysis.symbolName === 'string' ? recentAnalysis.symbolName : '',
         recentAnalysis.category,
         new Date(recentAnalysis.startedAt),
       ))
