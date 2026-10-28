@@ -4,7 +4,7 @@ import { BackendRejectionError } from '~/domain/errors/backend-rejection-error'
 import { BackendUnavailableError } from '~/domain/errors/backend-unavailable-error'
 import { ApiKeyStatus } from '~/domain/models/entities/api-key-status'
 import { createAnalysisEvent, createAnalysisResult } from '../../../fixtures/entity-fixtures'
-import { mountAnalysisRoutes } from '../../../fixtures/console-router'
+import { linkTargetOf, mountAnalysisRoutes } from '../../../fixtures/console-router'
 
 const completedAnalysisEvent = () => createAnalysisEvent({
   analysisEventId: 42,
@@ -13,9 +13,6 @@ const completedAnalysisEvent = () => createAnalysisEvent({
   status: 'succeeded',
   result: createAnalysisResult({ createdAt: new Date('2026-10-28T01:15:00Z') }),
 })
-
-const linkTargetOf = (wrapper: Awaited<ReturnType<typeof mountAnalysisRoutes>>['wrapper'], text: string) =>
-  wrapper.findAllComponents({ name: 'RouterLinkStub' }).find(link => link.text() === text)?.props('to')
 
 describe('analysis report page', () => {
   beforeEach(() => {
@@ -50,7 +47,7 @@ describe('analysis report page', () => {
 
     expect(stack.documentPrintProxy.printDocument).toHaveBeenCalledTimes(2)
     expect(stack.documentPrintProxy.printDocument).toHaveBeenLastCalledWith('台股-2330-分析-2026-10-28')
-    expect(linkTargetOf(wrapper, '返回分析事件')).toBe('/analysis-events/42')
+    expect(linkTargetOf(wrapper, '返回分析事件')?.props('to')).toBe('/analysis-events/42')
   })
 
   it.each(['running', 'failed'])('says a %s analysis has nothing to export and does not open the save dialog', async (status) => {
@@ -61,7 +58,7 @@ describe('analysis report page', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('這筆分析尚無可匯出的結果')
-    expect(linkTargetOf(wrapper, '返回分析事件')).toBe('/analysis-events/43')
+    expect(linkTargetOf(wrapper, '返回分析事件')?.props('to')).toBe('/analysis-events/43')
     expect(wrapper.findAll('button').map(button => button.text())).not.toContain('匯出 PDF')
     expect(stack.documentPrintProxy.printDocument).not.toHaveBeenCalled()
   })

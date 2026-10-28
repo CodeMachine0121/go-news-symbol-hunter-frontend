@@ -4,7 +4,7 @@ import { POLLING_INTERVAL_MILLISECONDS } from '~/composables/use-analysis-event-
 import { BackendRejectionError } from '~/domain/errors/backend-rejection-error'
 import { StartedSymbolAnalysis } from '~/domain/models/entities/started-symbol-analysis'
 import { STARTED_AT, createAnalysisEvent, createAnalysisResult } from '../../../fixtures/entity-fixtures'
-import { mountAnalysisRoutes } from '../../../fixtures/console-router'
+import { linkTargetOf, mountAnalysisRoutes } from '../../../fixtures/console-router'
 
 describe('analysis event page', () => {
   beforeEach(() => {
@@ -76,9 +76,6 @@ describe('analysis event page', () => {
 })
 
 describe('analysis event page export', () => {
-  const exportLinkOf = (wrapper: Awaited<ReturnType<typeof mountAnalysisRoutes>>['wrapper']) =>
-    wrapper.findAllComponents({ name: 'RouterLinkStub' }).find(link => link.text() === '匯出 PDF')
-
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
     vi.setSystemTime(new Date(STARTED_AT.getTime() + 60 * 1000))
@@ -94,7 +91,7 @@ describe('analysis event page export', () => {
 
     await router.push('/analysis-events/42')
     await flushPromises()
-    const exportLink = exportLinkOf(wrapper)
+    const exportLink = linkTargetOf(wrapper, '匯出 PDF')
 
     expect(exportLink?.props('to')).toBe('/analysis-events/42/report')
     expect(exportLink?.attributes('target')).toBe('_blank')
@@ -123,6 +120,6 @@ describe('analysis event page export', () => {
     await vi.advanceTimersByTimeAsync(POLLING_INTERVAL_MILLISECONDS)
     await flushPromises()
 
-    expect(exportLinkOf(wrapper)?.props('to')).toBe('/analysis-events/42/report')
+    expect(linkTargetOf(wrapper, '匯出 PDF')?.props('to')).toBe('/analysis-events/42/report')
   })
 })

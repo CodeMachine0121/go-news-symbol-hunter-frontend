@@ -3,7 +3,7 @@ import Decimal from 'decimal.js'
 import { describe, expect, it } from 'vitest'
 import AnalysisReportDocument from '~/components/organisms/AnalysisReportDocument.vue'
 import { AnalysisEvidence } from '~/domain/models/entities/analysis-evidence'
-import { AnalysisResult } from '~/domain/models/entities/analysis-result'
+import type { AnalysisResult } from '~/domain/models/entities/analysis-result'
 import { KeyEvent } from '~/domain/models/entities/key-event'
 import { PriceAtAnalysis } from '~/domain/models/entities/price-at-analysis'
 import { createAnalysisEvent, createAnalysisResult } from '../../fixtures/entity-fixtures'
@@ -14,20 +14,8 @@ const COMPLETED_AT = new Date('2026-10-28T01:15:00Z')
 const keyEvent = (number: number): KeyEvent => new KeyEvent(`關鍵事件 ${number}`, `https://news.example/key-${number}`, COMPLETED_AT)
 const evidence = (number: number): AnalysisEvidence => new AnalysisEvidence(`佐證新聞 ${number}`, `https://news.example/evidence-${number}`, COMPLETED_AT, `新聞來源 ${number}`)
 
-const analysisResult = (overrides: { grade?: string, reason?: string, keyEvents?: KeyEvent[], riskFactors?: string[], evidence?: AnalysisEvidence[], priceAtAnalysis?: PriceAtAnalysis } = {}): AnalysisResult => {
-  const base = createAnalysisResult({ createdAt: COMPLETED_AT })
-  return new AnalysisResult(
-    overrides.grade ?? 'bullish',
-    72,
-    'short',
-    overrides.reason ?? base.reason,
-    overrides.keyEvents ?? base.keyEvents,
-    overrides.riskFactors ?? base.riskFactors,
-    overrides.evidence ?? base.evidence,
-    overrides.priceAtAnalysis,
-    COMPLETED_AT,
-  )
-}
+const analysisResult = (overrides: Parameters<typeof createAnalysisResult>[0] = {}): AnalysisResult =>
+  createAnalysisResult({ priceAtAnalysis: null, ...overrides, createdAt: COMPLETED_AT })
 
 const mountReport = (result: AnalysisResult) => mount(AnalysisReportDocument, {
   props: {

@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import AnalysisResultReport from '~/components/organisms/AnalysisResultReport.vue'
-import { AnalysisResult } from '~/domain/models/entities/analysis-result'
+import type { AnalysisResult } from '~/domain/models/entities/analysis-result'
 import { STARTED_AT, createAnalysisEvent, createAnalysisResult, createPriceAtAnalysis } from '../../fixtures/entity-fixtures'
 
 const resultOf = (result: AnalysisResult) => {
@@ -39,8 +39,7 @@ describe('AnalysisResultReport', () => {
   })
 
   it('says when there are no key events or risk factors', () => {
-    const result = createAnalysisResult()
-    const empty = new AnalysisResult(result.grade, result.confidence, result.timeHorizon, result.reason, [], [], [], result.priceAtAnalysis, result.createdAt)
+    const empty = createAnalysisResult({ keyEvents: [], riskFactors: [], evidence: [] })
 
     const text = mount(AnalysisResultReport, { props: { result: resultOf(empty) } }).text()
 

@@ -1,4 +1,4 @@
-import { flushPromises, mount } from '@vue/test-utils'
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { defineComponent, h } from 'vue'
 import { createMemoryHistory, createRouter, RouterView, useRoute } from 'vue-router'
 import AnalysisEventPage from '~/pages/analysis-events/[analysisEventId]/index.vue'
@@ -39,3 +39,6 @@ export const mountAnalysisRoutes = async (
   await flushPromises()
   return { stack, router, wrapper }
 }
+
+export const linkTargetOf = (wrapper: VueWrapper, text: string) =>
+  wrapper.findAllComponents({ name: 'RouterLinkStub' }).find(link => link.text() === text)
