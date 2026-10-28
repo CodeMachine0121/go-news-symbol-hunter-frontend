@@ -16,10 +16,13 @@ const KeyedRouterView = defineComponent({
 
 export const mountAnalysisRoutes = async (
   initialPath: string,
-  { storedApiKey, apiKeyStatus }: { storedApiKey?: string, apiKeyStatus: ApiKeyStatus | Error } = { storedApiKey: 'key', apiKeyStatus: new ApiKeyStatus('我的研究', 'active') },
+  { storedApiKey, apiKeyStatus }: { storedApiKey?: string, apiKeyStatus: ApiKeyStatus | Error | Promise<ApiKeyStatus> } = { storedApiKey: 'key', apiKeyStatus: new ApiKeyStatus('我的研究', 'active') },
 ) => {
   const stack = createApplicationStack(storedApiKey)
-  if (apiKeyStatus instanceof Error) {
+  if (apiKeyStatus instanceof Promise) {
+    stack.apiKeyProxy.getApiKeyStatus.mockReturnValue(apiKeyStatus)
+  }
+  else if (apiKeyStatus instanceof Error) {
     stack.apiKeyProxy.getApiKeyStatus.mockRejectedValue(apiKeyStatus)
   }
   else {

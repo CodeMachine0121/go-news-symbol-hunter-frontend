@@ -37,6 +37,43 @@ describe('analysis report page', () => {
     expect(stack.documentPrintProxy.printDocument).toHaveBeenCalledExactlyOnceWith('台股-2330-分析-2026-10-28')
   })
 
+  it('waits for the API key check before opening the save dialog on the shown report', async () => {
+    let confirmApiKey: (apiKeyStatus: ApiKeyStatus) => void = () => undefined
+    const pendingApiKeyStatus = new Promise<ApiKeyStatus>((resolve) => {
+      confirmApiKey = resolve
+    })
+    const { stack, router, wrapper } = await mountAnalysisRoutes('/analysis-events', { storedApiKey: 'key', apiKeyStatus: pendingApiKeyStatus })
+    stack.analysisEventProxy.getAnalysisEvent.mockResolvedValue(completedAnalysisEvent())
+    const reportShownWhenPrinting: boolean[] = []
+    stack.documentPrintProxy.printDocument.mockImplementation(() => {
+      reportShownWhenPrinting.push(wrapper.find('.analysis-report-document').exists())
+    })
+
+    await router.push('/analysis-events/42/report')
+    await flushPromises()
+    expect(stack.documentPrintProxy.printDocument).not.toHaveBeenCalled()
+    confirmApiKey(new ApiKeyStatus('我的研究', 'active'))
+    await flushPromises()
+
+    expect(reportShownWhenPrinting).toEqual([true])
+  })
+
+  it('keeps every control out of the printed paper', async () => {
+    const { stack, router, wrapper } = await mountAnalysisRoutes('/analysis-events')
+    stack.analysisEventProxy.getAnalysisEvent.mockResolvedValue(completedAnalysisEvent())
+
+    await router.push('/analysis-events/42/report')
+    await flushPromises()
+    const paper = wrapper.find('.report-layout__paper')
+
+    expect(paper.text()).toContain('標的分析報告')
+    expect(paper.findAll('button')).toHaveLength(0)
+    expect(paper.text()).not.toContain('返回分析事件')
+    expect(paper.text()).not.toContain('匯出 PDF')
+    expect(wrapper.find('.report-layout__toolbar').text()).toContain('返回分析事件')
+    expect(wrapper.find('.report-layout__toolbar').text()).toContain('匯出 PDF')
+  })
+
   it('opens the save dialog again from the toolbar and leads back to the analysis event', async () => {
     const { stack, router, wrapper } = await mountAnalysisRoutes('/analysis-events')
     stack.analysisEventProxy.getAnalysisEvent.mockResolvedValue(completedAnalysisEvent())
