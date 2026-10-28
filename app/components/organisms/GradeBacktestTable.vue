@@ -46,7 +46,7 @@ defineProps<{
           >
             <td>
               <NuxtLink
-                v-if="analysis.analysisEventId !== undefined"
+                v-if="analysis.linksToAnalysisEvent"
                 class="grade-backtest-table__link"
                 :to="`/analysis-events/${analysis.analysisEventId}`"
               >

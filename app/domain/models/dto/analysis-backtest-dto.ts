@@ -17,5 +17,7 @@ export class AnalysisBacktestDto {
     readonly gradeRecordId: number,
     readonly source: LabelledValueDto,
     readonly tradingDayText: string,
+    // only a manual grade record has an analysis event to open
+    readonly linksToAnalysisEvent: boolean,
   ) {}
 }

@@ -111,13 +111,13 @@ describe('GradeBacktestDomain', () => {
   it('marks a manual record with its analysis event and no trading day', () => {
     const analysis = createGradeBacktest({ analyses: [createAnalysisBacktest()] }).toDomain().toDto().analyses[0]
 
-    expect(analysis).toMatchObject({ gradeRecordId: 7, analysisEventId: 42, tradingDayText: '—', source: { value: 'manual', label: '手動' } })
+    expect(analysis).toMatchObject({ gradeRecordId: 7, analysisEventId: 42, linksToAnalysisEvent: true, tradingDayText: '—', source: { value: 'manual', label: '手動' } })
   })
 
   it('marks a background record with its trading day and no analysis event', () => {
     const analysis = createGradeBacktest({ analyses: [createAnalysisBacktest({ source: 'background', analysisEventId: null, tradingDay: '2026-10-28' })] }).toDomain().toDto().analyses[0]
 
-    expect(analysis).toMatchObject({ analysisEventId: undefined, tradingDayText: '2026-10-28', source: { value: 'background', label: '背景' } })
+    expect(analysis).toMatchObject({ analysisEventId: undefined, linksToAnalysisEvent: false, tradingDayText: '2026-10-28', source: { value: 'background', label: '背景' } })
   })
 
   it('shows a grade source it does not know as it is', () => {

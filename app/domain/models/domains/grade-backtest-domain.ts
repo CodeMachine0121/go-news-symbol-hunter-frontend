@@ -56,6 +56,7 @@ export class GradeBacktestDomain {
         analysis.gradeRecordId,
         new GradeSourceDomain(analysis.source).toDto(),
         analysis.tradingDay ?? NOT_AVAILABLE,
+        analysis.analysisEventId !== undefined,
       )),
       toGroupDtos(this.gradeBacktest.bySource, GRADE_SOURCES, source => new GradeSourceDomain(source).toDto()),
     )
